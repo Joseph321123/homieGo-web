@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    container_name: homiego-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - /app/node_modules
