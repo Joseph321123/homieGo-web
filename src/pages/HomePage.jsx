@@ -1,34 +1,30 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
-
-const featuredProperties = [
-  {
-    name: 'House in the beach',
-    place: 'Beach front',
-    price: 'TÍTULO DE RENTA',
-    tags: ['BEACH', 'BUY', 'RENT'],
-    photo: 'linear-gradient(135deg, #002862, #1383f9 45%, #4cb0ff)',
-  },
-  {
-    name: 'Center apartment',
-    place: 'Center area',
-    price: 'TÍTULO DE CASA',
-    tags: ['CENTER', 'BUY', 'RENT'],
-    photo: 'linear-gradient(135deg, #002862, #4cb0ff 45%, #fff4e9)',
-  },
-  {
-    name: 'Nature cabin',
-    place: 'Green zone',
-    price: 'TÍTULO DE RENTA',
-    tags: ['NATURE', 'BUY', 'RENT'],
-    photo: 'linear-gradient(135deg, #1383f9, #4cb0ff 48%, #fff4e9)',
-  },
-]
+import { fetchProperties } from '../services/api'
 
 const categories = ['NATURE', 'BEACH', 'CENTER']
 const footerItems = ['About us', 'Contact', 'Sucursales']
 
 const HomePage = () => {
+  const [featuredProperties, setFeaturedProperties] = useState([])
+  const [propertyCount, setPropertyCount] = useState(0)
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        const response = await fetchProperties()
+        setPropertyCount(response.total)
+        setFeaturedProperties(response.data.slice(0, 3))
+      } catch {
+        setFeaturedProperties([])
+      }
+    }
+
+    loadFeatured()
+  }, [])
+
   return (
     <SiteShell>
       <section className="hero">
@@ -86,8 +82,8 @@ const HomePage = () => {
       <section className="section">
         <div className="stats-grid">
           <article className="stat-card">
-            <span className="stat-value">120+</span>
-            <span className="stat-label">Títulos de renta o casas listos para catálogo.</span>
+            <span className="stat-value">{propertyCount > 0 ? `${propertyCount}+` : '3+'}</span>
+            <span className="stat-label">Propiedades activas en el catálogo conectado a la API.</span>
           </article>
           <article className="stat-card">
             <span className="stat-value">3 roles</span>
@@ -109,25 +105,13 @@ const HomePage = () => {
         </div>
 
         <div className="property-grid">
-          {featuredProperties.map((property) => (
-            <article className="property-card" key={property.name}>
-              <div className="property-photo" style={{ '--photo': property.photo }} />
-              <div className="stack">
-                <div>
-                  <h3 className="property-title">{property.name}</h3>
-                  <p className="card-meta">{property.place}</p>
-                </div>
-                <div className="property-tags">
-                  {property.tags.map((tag) => (
-                    <span className="tag" key={tag}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <strong>{property.price}</strong>
-              </div>
-            </article>
-          ))}
+          {featuredProperties.length > 0 ? (
+            featuredProperties.map((property, index) => (
+              <PropertyCard key={property.id} property={property} index={index} />
+            ))
+          ) : (
+            <p className="state-message">Conecta la API para ver alojamientos destacados.</p>
+          )}
         </div>
       </section>
 

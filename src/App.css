@@ -396,6 +396,23 @@
     var(--photo, #4cb0ff);
 }
 
+.property-photo-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.state-message {
+  padding: 1rem 1.2rem;
+  background: rgba(76, 176, 255, 0.08);
+  color: #35547d;
+  font-weight: 600;
+}
+
+.state-message-error {
+  background: rgba(220, 38, 38, 0.08);
+  color: #991b1b;
+}
+
 .property-tags,
 .badge-row {
   display: flex;
