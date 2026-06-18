@@ -1,48 +1,65 @@
+import { useEffect, useState } from 'react'
+import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
+import { fetchProperties } from '../services/api'
 
 const PropertiesPage = () => {
+  const [properties, setProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    let active = true
+
+    const loadProperties = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        const response = await fetchProperties()
+        if (active) setProperties(response.data)
+      } catch {
+        if (active) {
+          setError('No pudimos cargar las propiedades. Verifica que la API esté corriendo.')
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    loadProperties()
+
+    return () => {
+      active = false
+    }
+  }, [])
+
   return (
     <SiteShell>
       <section className="section">
         <div className="section-header">
           <div>
-            <span className="eyebrow">Catálogo inicial</span>
+            <span className="eyebrow">Catálogo conectado</span>
             <h1 className="section-title">Explora propiedades disponibles</h1>
             <p className="page-subtitle">
-              Esta vista deja lista la base para filtros, tarjetas de alojamientos y reservas.
+              Listado obtenido desde la API y la base de datos PostgreSQL de HomieGo.
             </p>
           </div>
         </div>
 
-        <div className="property-grid">
-          <article className="property-card">
-            <div className="property-photo" style={{ '--photo': 'linear-gradient(135deg, #002862, #1383f9)' }} />
-            <h3 className="property-title">Casa de playa con terraza</h3>
-            <p className="card-meta">Puerto Escondido</p>
-            <div className="property-tags">
-              <span className="tag">4 huéspedes</span>
-              <span className="tag">Vista al mar</span>
-            </div>
-          </article>
-          <article className="property-card">
-            <div className="property-photo" style={{ '--photo': 'linear-gradient(135deg, #1383f9, #4cb0ff)' }} />
-            <h3 className="property-title">Suite moderna en el centro</h3>
-            <p className="card-meta">Monterrey</p>
-            <div className="property-tags">
-              <span className="tag">WiFi</span>
-              <span className="tag">Aire acondicionado</span>
-            </div>
-          </article>
-          <article className="property-card">
-            <div className="property-photo" style={{ '--photo': 'linear-gradient(135deg, #002862, #4cb0ff)' }} />
-            <h3 className="property-title">Cabaña tranquila para descansar</h3>
-            <p className="card-meta">Aguascalientes</p>
-            <div className="property-tags">
-              <span className="tag">Naturaleza</span>
-              <span className="tag">Parejas</span>
-            </div>
-          </article>
-        </div>
+        {loading && <p className="state-message">Cargando propiedades...</p>}
+        {error && <p className="state-message state-message-error">{error}</p>}
+
+        {!loading && !error && properties.length === 0 && (
+          <p className="state-message">Aún no hay propiedades publicadas.</p>
+        )}
+
+        {!loading && !error && properties.length > 0 && (
+          <div className="property-grid">
+            {properties.map((property, index) => (
+              <PropertyCard key={property.id} property={property} index={index} />
+            ))}
+          </div>
+        )}
       </section>
     </SiteShell>
   )
