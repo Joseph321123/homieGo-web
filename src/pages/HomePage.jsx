@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
@@ -8,8 +8,20 @@ const categories = ['NATURE', 'BEACH', 'CENTER']
 const footerItems = ['About us', 'Contact', 'Sucursales']
 
 const HomePage = () => {
+  const navigate = useNavigate()
+  const [destination, setDestination] = useState('')
   const [featuredProperties, setFeaturedProperties] = useState([])
   const [propertyCount, setPropertyCount] = useState(0)
+
+  const handleSearch = (event) => {
+    event.preventDefault()
+    const query = destination.trim()
+    if (query) {
+      navigate(`/properties?ciudad=${encodeURIComponent(query)}`)
+      return
+    }
+    navigate('/properties')
+  }
 
   useEffect(() => {
     const loadFeatured = async () => {
@@ -56,10 +68,16 @@ const HomePage = () => {
           </div>
 
           <aside className="mini-search-fixed" aria-label="Mini search">
-            <div className="mini-search-panel">
+            <form className="mini-search-panel" onSubmit={handleSearch}>
               <div className="field">
                 <label htmlFor="ms-destination">Dónde</label>
-                <input id="ms-destination" type="text" placeholder="Ciudad o zona" />
+                <input
+                  id="ms-destination"
+                  type="text"
+                  placeholder="Ciudad o zona"
+                  value={destination}
+                  onChange={(event) => setDestination(event.target.value)}
+                />
               </div>
               <div className="field-inline">
                 <div className="field">
@@ -71,10 +89,10 @@ const HomePage = () => {
                   <input id="ms-checkout" type="date" />
                 </div>
               </div>
-              <Link className="button" to="/properties">
+              <button className="button" type="submit">
                 Buscar
-              </Link>
-            </div>
+              </button>
+            </form>
           </aside>
         </div>
       </section>

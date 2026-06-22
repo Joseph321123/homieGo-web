@@ -8,3 +8,8 @@ export const fetchProperties = async (params = {}) => {
   const { data } = await api.get('/api/properties', { params })
   return data
 }
+
+export const fetchPropertyById = async (id) => {
+  const { data } = await api.get(`/api/properties/${id}`)
+  return data
+}
