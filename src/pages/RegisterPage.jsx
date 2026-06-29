@@ -1,57 +1,129 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
+import { useAuth } from '../context/AuthContext'
+import { getApiErrorMessage } from '../services/api'
 
 const RegisterPage = () => {
+  const { register, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [form, setForm] = useState({
+    nombre: '',
+    email: '',
+    telefono: '',
+    password: '',
+    asHost: location.state?.needHost || false,
+  })
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  const updateField = (field) => (event) => {
+    const value = field === 'asHost' ? event.target.checked : event.target.value
+    setForm((current) => ({ ...current, [field]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      await register(form)
+      navigate(form.asHost ? '/host' : '/properties', { replace: true })
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos crear la cuenta'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <SiteShell>
       <section className="auth-grid">
-        <div className="auth-card">
+        <form className="auth-card" onSubmit={handleSubmit}>
           <span className="eyebrow">Nuevo usuario</span>
           <h1 className="section-title">Crea tu cuenta en HomieGo</h1>
           <p className="page-subtitle">
-            Un registro simple para empezar a buscar hospedajes o publicar tu primera propiedad.
+            Regístrate para reservar hospedajes o publicar tu primera propiedad.
           </p>
 
           <div className="stack" style={{ marginTop: '1rem' }}>
-            <div className="split-grid">
-              <div className="field">
-                <label htmlFor="name">Nombre</label>
-                <input id="name" type="text" placeholder="Tu nombre" />
-              </div>
-              <div className="field">
-                <label htmlFor="lastname">Apellido</label>
-                <input id="lastname" type="text" placeholder="Tu apellido" />
-              </div>
+            <div className="field">
+              <label htmlFor="name">Nombre completo</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Tu nombre"
+                value={form.nombre}
+                onChange={updateField('nombre')}
+                required
+              />
             </div>
             <div className="field">
               <label htmlFor="register-email">Correo electrónico</label>
-              <input id="register-email" type="email" placeholder="tu@correo.com" />
+              <input
+                id="register-email"
+                type="email"
+                placeholder="tu@correo.com"
+                value={form.email}
+                onChange={updateField('email')}
+                required
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="register-phone">Teléfono</label>
+              <input
+                id="register-phone"
+                type="tel"
+                placeholder="+52 555 000 0000"
+                value={form.telefono}
+                onChange={updateField('telefono')}
+              />
             </div>
             <div className="field">
               <label htmlFor="register-password">Contraseña</label>
-              <input id="register-password" type="password" placeholder="Crea una contraseña" />
+              <input
+                id="register-password"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={form.password}
+                onChange={updateField('password')}
+                minLength={6}
+                required
+              />
             </div>
+            <label className="checkbox-field">
+              <input type="checkbox" checked={form.asHost} onChange={updateField('asHost')} />
+              También quiero publicar propiedades como anfitrión
+            </label>
+
+            {error && <p className="state-message state-message-error">{error}</p>}
+
             <div className="form-actions">
-              <Link className="button" to="/login">
-                Crear cuenta
-              </Link>
+              <button className="button" type="submit" disabled={loading}>
+                {loading ? 'Creando cuenta...' : 'Crear cuenta'}
+              </button>
               <Link className="button-secondary" to="/login">
                 Ya tengo cuenta
               </Link>
             </div>
           </div>
-        </div>
+        </form>
 
         <aside className="panel-card">
-          <h2 className="panel-title">Pensado para crecer</h2>
+          <h2 className="panel-title">Roles disponibles</h2>
           <p className="panel-text">
-            Después se podrá conectar con validaciones, roles, verificación por correo y
-            permisos personalizados.
+            Todos los usuarios pueden reservar. Si activas anfitrión, también podrás publicar
+            propiedades desde el panel correspondiente.
           </p>
           <div className="badge-row">
             <span className="badge">Huésped</span>
             <span className="badge">Anfitrión</span>
-            <span className="badge">Administrador</span>
           </div>
         </aside>
       </section>

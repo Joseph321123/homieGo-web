@@ -1,54 +1,206 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
+import { useAuth } from '../context/AuthContext'
+import { createProperty, fetchMyProperties, getApiErrorMessage } from '../services/api'
 
 const HostPage = () => {
+  const { token, user } = useAuth()
+  const [myProperties, setMyProperties] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    address: '',
+    city: '',
+    country: 'México',
+    price_per_night: '',
+    max_guests: '',
+    photo_url: '',
+  })
+
+  const loadMyProperties = async () => {
+    try {
+      setLoading(true)
+      const response = await fetchMyProperties(token)
+      setMyProperties(response.data)
+    } catch {
+      setError('No pudimos cargar tus propiedades.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadMyProperties()
+  }, [token])
+
+  const updateField = (field) => (event) => {
+    setForm((current) => ({ ...current, [field]: event.target.value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setSubmitting(true)
+    setError('')
+    setMessage('')
+
+    try {
+      await createProperty(token, {
+        ...form,
+        price_per_night: Number(form.price_per_night),
+        max_guests: Number(form.max_guests),
+      })
+      setMessage('Propiedad publicada correctamente.')
+      setForm({
+        title: '',
+        description: '',
+        address: '',
+        city: '',
+        country: 'México',
+        price_per_night: '',
+        max_guests: '',
+        photo_url: '',
+      })
+      await loadMyProperties()
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos publicar la propiedad'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <SiteShell>
       <section className="dashboard-grid">
-        <article className="panel-card">
+        <form className="panel-card" onSubmit={handleSubmit}>
           <span className="eyebrow">Panel de anfitrión</span>
-          <h1 className="section-title">Administra tus hospedajes</h1>
+          <h1 className="section-title">Publica un hospedaje</h1>
           <p className="page-subtitle">
-            Aquí irá la publicación de propiedades, calendario de disponibilidad y seguimiento de reservas.
+            Hola {user?.nombre}, completa el formulario para agregar una propiedad al catálogo.
           </p>
 
           <div className="stack" style={{ marginTop: '1rem' }}>
+            <div className="field">
+              <label htmlFor="property-name">Nombre de la propiedad</label>
+              <input
+                id="property-name"
+                type="text"
+                placeholder="Ej. Loft con terraza"
+                value={form.title}
+                onChange={updateField('title')}
+                required
+              />
+            </div>
             <div className="split-grid">
               <div className="field">
-                <label htmlFor="property-name">Nombre de la propiedad</label>
-                <input id="property-name" type="text" placeholder="Ej. Loft con terraza" />
+                <label htmlFor="property-city">Ciudad</label>
+                <input
+                  id="property-city"
+                  type="text"
+                  value={form.city}
+                  onChange={updateField('city')}
+                  required
+                />
               </div>
               <div className="field">
-                <label htmlFor="property-type">Tipo</label>
-                <select id="property-type" defaultValue="apartment">
-                  <option value="apartment">Departamento</option>
-                  <option value="house">Casa</option>
-                  <option value="cabin">Cabaña</option>
-                </select>
+                <label htmlFor="property-country">País</label>
+                <input
+                  id="property-country"
+                  type="text"
+                  value={form.country}
+                  onChange={updateField('country')}
+                  required
+                />
               </div>
             </div>
             <div className="field">
-              <label htmlFor="property-description">Descripción</label>
-              <textarea id="property-description" rows="4" placeholder="Describe comodidades, ubicación y estilo del alojamiento" />
+              <label htmlFor="property-address">Dirección</label>
+              <input
+                id="property-address"
+                type="text"
+                value={form.address}
+                onChange={updateField('address')}
+                required
+              />
             </div>
+            <div className="field">
+              <label htmlFor="property-description">Descripción</label>
+              <textarea
+                id="property-description"
+                rows="4"
+                value={form.description}
+                onChange={updateField('description')}
+                placeholder="Describe comodidades, ubicación y estilo del alojamiento"
+              />
+            </div>
+            <div className="split-grid">
+              <div className="field">
+                <label htmlFor="property-price">Precio por noche (MXN)</label>
+                <input
+                  id="property-price"
+                  type="number"
+                  min="1"
+                  value={form.price_per_night}
+                  onChange={updateField('price_per_night')}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="property-guests">Huéspedes máximos</label>
+                <input
+                  id="property-guests"
+                  type="number"
+                  min="1"
+                  value={form.max_guests}
+                  onChange={updateField('max_guests')}
+                  required
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label htmlFor="property-photo">URL de foto (opcional)</label>
+              <input
+                id="property-photo"
+                type="url"
+                placeholder="https://..."
+                value={form.photo_url}
+                onChange={updateField('photo_url')}
+              />
+            </div>
+
+            {message && <p className="state-message">{message}</p>}
+            {error && <p className="state-message state-message-error">{error}</p>}
+
             <div className="form-actions">
-              <span className="button">Publicar borrador</span>
-              <span className="button-secondary">Ver calendario</span>
+              <button className="button" type="submit" disabled={submitting}>
+                {submitting ? 'Publicando...' : 'Publicar propiedad'}
+              </button>
+              <Link className="button-secondary" to="/properties">
+                Ver catálogo
+              </Link>
             </div>
           </div>
-        </article>
+        </form>
 
         <aside className="stack">
           <article className="panel-card">
-            <h2 className="panel-title">Funciones futuras</h2>
-            <p className="panel-text">Disponibilidad, precios por noche, fotos, reseñas y mensajería.</p>
-          </article>
-          <article className="panel-card">
-            <h2 className="panel-title">Estado actual</h2>
-            <ul>
-              <li>Catálogo de propiedades</li>
-              <li>Reservaciones</li>
-              <li>Herramientas para anfitriones</li>
-            </ul>
+            <h2 className="panel-title">Tus propiedades</h2>
+            {loading && <p className="panel-text">Cargando...</p>}
+            {!loading && myProperties.length === 0 && (
+              <p className="panel-text">Aún no has publicado propiedades.</p>
+            )}
+            {!loading && myProperties.length > 0 && (
+              <div className="property-grid host-property-grid">
+                {myProperties.map((property, index) => (
+                  <PropertyCard key={property.id} property={property} index={index} />
+                ))}
+              </div>
+            )}
           </article>
         </aside>
       </section>
