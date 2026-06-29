@@ -1,48 +1,97 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
+import { useAuth } from '../context/AuthContext'
+import { getApiErrorMessage } from '../services/api'
 
 const LoginPage = () => {
+  const { login, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const redirectTo = location.state?.from || '/'
+
+  if (isAuthenticated) {
+    return <Navigate to={redirectTo} replace />
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      await login({ email, password })
+      navigate(redirectTo, { replace: true })
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos iniciar sesión'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <SiteShell>
       <section className="auth-grid">
-        <div className="auth-card">
+        <form className="auth-card" onSubmit={handleSubmit}>
           <span className="eyebrow">Acceso a tu cuenta</span>
           <h1 className="section-title">Inicia sesión en HomieGo</h1>
           <p className="page-subtitle">
-            Este espacio deja lista la base visual para autenticación de huéspedes,
-            anfitriones y administradores.
+            Ingresa con tu cuenta para reservar alojamientos o administrar propiedades.
           </p>
 
           <div className="stack" style={{ marginTop: '1rem' }}>
             <div className="field">
               <label htmlFor="login-email">Correo electrónico</label>
-              <input id="login-email" type="email" placeholder="tu@correo.com" />
+              <input
+                id="login-email"
+                type="email"
+                placeholder="tu@correo.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
             </div>
             <div className="field">
               <label htmlFor="login-password">Contraseña</label>
-              <input id="login-password" type="password" placeholder="••••••••" />
+              <input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
             </div>
+
+            {error && <p className="state-message state-message-error">{error}</p>}
+
             <div className="form-actions">
-              <Link className="button" to="/">
-                Entrar
-              </Link>
+              <button className="button" type="submit" disabled={loading}>
+                {loading ? 'Entrando...' : 'Entrar'}
+              </button>
               <Link className="button-secondary" to="/register">
                 Crear una cuenta
               </Link>
             </div>
           </div>
-        </div>
+        </form>
 
         <aside className="panel-card">
-          <h2 className="panel-title">Lo que tendrá de función en esta pantaá xd</h2>
+          <h2 className="panel-title">Cuenta demo</h2>
           <p className="panel-text">
-            Inicio de sesión, recuperación de acceso y selección de rol para mostrar
-            opciones distintas a huéspedes y anfitriones.
+            Anfitriona de prueba: <strong>ana@homiego.demo</strong>
+            <br />
+            Contraseña: <strong>HomieGo123</strong>
           </p>
           <ul>
-            <li>Autenticación básica</li>
-            <li>Protección de rutas futuras</li>
-            <li>Acceso a paneles de gestión</li>
+            <li>Reservar propiedades como huésped</li>
+            <li>Publicar alojamientos como anfitrión</li>
+            <li>Ver historial de reservas</li>
           </ul>
         </aside>
       </section>

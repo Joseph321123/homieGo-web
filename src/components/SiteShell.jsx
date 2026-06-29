@@ -1,13 +1,22 @@
 import { Link, NavLink } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 const navigation = [
   { to: '/', label: 'Inicio' },
   { to: '/properties', label: 'Propiedades' },
-  { to: '/host', label: 'Ser anfitrión' },
-  { to: '/admin', label: 'Administración' },
+  { to: '/reservations', label: 'Mis reservas', auth: true },
+  { to: '/host', label: 'Ser anfitrión', host: true },
 ]
 
 const SiteShell = ({ children }) => {
+  const { isAuthenticated, isHost, user, logout } = useAuth()
+
+  const visibleNav = navigation.filter((item) => {
+    if (item.auth && !isAuthenticated) return false
+    if (item.host && !isHost) return false
+    return true
+  })
+
   return (
     <div className="app-shell">
       <header className="site-header">
@@ -20,7 +29,7 @@ const SiteShell = ({ children }) => {
         </Link>
 
         <nav className="site-nav" aria-label="Navegación principal">
-          {navigation.map((item) => (
+          {visibleNav.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -34,12 +43,23 @@ const SiteShell = ({ children }) => {
         </nav>
 
         <div className="site-header-actions">
-          <NavLink className="button-secondary" to="/login">
-            Ingresar
-          </NavLink>
-          <NavLink className="button" to="/register">
-            Crear cuenta
-          </NavLink>
+          {isAuthenticated ? (
+            <>
+              <span className="user-chip">Hola, {user?.nombre?.split(' ')[0]}</span>
+              <button className="button-secondary" type="button" onClick={logout}>
+                Salir
+              </button>
+            </>
+          ) : (
+            <>
+              <NavLink className="button-secondary" to="/login">
+                Ingresar
+              </NavLink>
+              <NavLink className="button" to="/register">
+                Crear cuenta
+              </NavLink>
+            </>
+          )}
         </div>
       </header>
 

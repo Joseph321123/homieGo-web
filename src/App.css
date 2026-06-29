@@ -453,6 +453,64 @@
   max-width: 720px;
 }
 
+.property-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.booking-panel {
+  position: sticky;
+  top: 6rem;
+}
+
+.user-chip {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #35547d;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 600;
+  color: #35547d;
+}
+
+.reservation-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.reservation-card {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.reservation-photo {
+  height: 120px;
+  background: var(--photo, #4cb0ff);
+}
+
+.host-property-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 900px) {
+  .property-detail-layout,
+  .reservation-card {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-panel {
+    position: static;
+  }
+}
+
 .property-tags,
 .badge-row {
   display: flex;

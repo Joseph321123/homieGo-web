@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import ProtectedRoute from '../components/ProtectedRoute'
 import AdminPage from '../pages/AdminPage'
 import HomePage from '../pages/HomePage'
 import HostPage from '../pages/HostPage'
@@ -7,6 +8,7 @@ import NotFoundPage from '../pages/NotFoundPage'
 import PropertyDetailPage from '../pages/PropertyDetailPage'
 import PropertiesPage from '../pages/PropertiesPage'
 import RegisterPage from '../pages/RegisterPage'
+import ReservationsPage from '../pages/ReservationsPage'
 
 const AppRouter = () => {
   return (
@@ -16,7 +18,22 @@ const AppRouter = () => {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/properties" element={<PropertiesPage />} />
       <Route path="/properties/:id" element={<PropertyDetailPage />} />
-      <Route path="/host" element={<HostPage />} />
+      <Route
+        path="/reservations"
+        element={
+          <ProtectedRoute>
+            <ReservationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/host"
+        element={
+          <ProtectedRoute hostOnly>
+            <HostPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/admin" element={<AdminPage />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFoundPage />} />
