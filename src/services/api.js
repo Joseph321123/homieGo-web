@@ -53,5 +53,49 @@ export const fetchMyProperties = async (token) => {
   return data
 }
 
+export const payReservation = async (token, reservationId, metodo_pago) => {
+  const { data } = await api.post(
+    `/api/reservations/${reservationId}/pay`,
+    { metodo_pago },
+    authHeaders(token)
+  )
+  return data
+}
+
+export const cancelReservation = async (token, reservationId) => {
+  const { data } = await api.patch(`/api/reservations/${reservationId}/cancel`, {}, authHeaders(token))
+  return data
+}
+
+export const createReview = async (token, payload) => {
+  const { data } = await api.post('/api/reviews', payload, authHeaders(token))
+  return data
+}
+
+export const fetchPropertyReviews = async (propertyId) => {
+  const { data } = await api.get(`/api/properties/${propertyId}/reviews`)
+  return data
+}
+
+export const fetchHostReservations = async (token) => {
+  const { data } = await api.get('/api/reservations/host', authHeaders(token))
+  return data
+}
+
+export const fetchAdminDashboard = async (token) => {
+  const { data } = await api.get('/api/admin/dashboard', authHeaders(token))
+  return data
+}
+
+export const fetchAdminReservations = async (token) => {
+  const { data } = await api.get('/api/admin/reservations', authHeaders(token))
+  return data
+}
+
+export const fetchAdminUsers = async (token) => {
+  const { data } = await api.get('/api/admin/users', authHeaders(token))
+  return data
+}
+
 export const getApiErrorMessage = (error, fallback = 'Ocurrió un error') =>
   error?.response?.data?.error || fallback

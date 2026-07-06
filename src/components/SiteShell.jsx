@@ -6,14 +6,16 @@ const navigation = [
   { to: '/properties', label: 'Propiedades' },
   { to: '/reservations', label: 'Mis reservas', auth: true },
   { to: '/host', label: 'Ser anfitrión', host: true },
+  { to: '/admin', label: 'Administración', admin: true },
 ]
 
 const SiteShell = ({ children }) => {
-  const { isAuthenticated, isHost, user, logout } = useAuth()
+  const { isAuthenticated, isHost, isAdmin, user, logout } = useAuth()
 
   const visibleNav = navigation.filter((item) => {
     if (item.auth && !isAuthenticated) return false
     if (item.host && !isHost) return false
+    if (item.admin && !isAdmin) return false
     return true
   })
 

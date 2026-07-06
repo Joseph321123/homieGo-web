@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createProperty, fetchMyProperties, getApiErrorMessage } from '../services/api'
+import { createProperty, fetchHostReservations, fetchMyProperties, getApiErrorMessage } from '../services/api'
 
 const HostPage = () => {
   const { token, user } = useAuth()
   const [myProperties, setMyProperties] = useState([])
+  const [hostReservations, setHostReservations] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState('')
@@ -26,8 +27,12 @@ const HostPage = () => {
   const loadMyProperties = async () => {
     try {
       setLoading(true)
-      const response = await fetchMyProperties(token)
-      setMyProperties(response.data)
+      const [propertiesResponse, reservationsResponse] = await Promise.all([
+        fetchMyProperties(token),
+        fetchHostReservations(token),
+      ])
+      setMyProperties(propertiesResponse.data)
+      setHostReservations(reservationsResponse.data)
     } catch {
       setError('No pudimos cargar tus propiedades.')
     } finally {
@@ -201,6 +206,22 @@ const HostPage = () => {
                 ))}
               </div>
             )}
+          </article>
+          <article className="panel-card">
+            <h2 className="panel-title">Reservas en tus propiedades</h2>
+            {hostReservations.length === 0 && (
+              <p className="panel-text">Aún no tienes reservas como anfitrión.</p>
+            )}
+            <div className="admin-table">
+              {hostReservations.map((item) => (
+                <div className="admin-row" key={item.id}>
+                  <span>{item.property_title}</span>
+                  <span>{item.guest_name}</span>
+                  <span>{item.check_in} → {item.check_out}</span>
+                  <span className="tag">{item.status}</span>
+                </div>
+              ))}
+            </div>
           </article>
         </aside>
       </section>

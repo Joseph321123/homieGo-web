@@ -1,8 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-const ProtectedRoute = ({ children, hostOnly = false }) => {
-  const { isAuthenticated, isHost, loading } = useAuth()
+const ProtectedRoute = ({ children, hostOnly = false, adminOnly = false }) => {
+  const { isAuthenticated, isHost, isAdmin, loading } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -11,6 +11,10 @@ const ProtectedRoute = ({ children, hostOnly = false }) => {
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/" replace />
   }
 
   if (hostOnly && !isHost) {

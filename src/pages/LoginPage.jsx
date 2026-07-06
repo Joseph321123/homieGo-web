@@ -82,11 +82,11 @@ const LoginPage = () => {
         </form>
 
         <aside className="panel-card">
-          <h2 className="panel-title">Cuenta demo</h2>
+          <h2 className="panel-title">Cuentas demo</h2>
           <p className="panel-text">
-            Anfitriona de prueba: <strong>ana@homiego.demo</strong>
+            Anfitriona: <strong>ana@homiego.demo</strong> / <strong>HomieGo123</strong>
             <br />
-            Contraseña: <strong>HomieGo123</strong>
+            Admin: <strong>admin@homiego.demo</strong> / <strong>HomieGo123</strong>
           </p>
           <ul>
             <li>Reservar propiedades como huésped</li>
