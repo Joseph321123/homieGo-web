@@ -3,13 +3,14 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { formatPrice } from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createReservation, fetchPropertyById, getApiErrorMessage } from '../services/api'
+import { createReservation, fetchPropertyById, fetchPropertyReviews, getApiErrorMessage } from '../services/api'
 
 const PropertyDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated, token } = useAuth()
   const [property, setProperty] = useState(null)
+  const [reviews, setReviews] = useState({ items: [], average: null, total: 0 })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [booking, setBooking] = useState({ check_in: '', check_out: '', guests: 1 })
@@ -24,8 +25,14 @@ const PropertyDetailPage = () => {
       try {
         setLoading(true)
         setError('')
-        const response = await fetchPropertyById(id)
-        if (active) setProperty(response.data)
+        const [propertyResponse, reviewsResponse] = await Promise.all([
+          fetchPropertyById(id),
+          fetchPropertyReviews(id),
+        ])
+        if (active) {
+          setProperty(propertyResponse.data)
+          setReviews(reviewsResponse.data)
+        }
       } catch {
         if (active) setError('No encontramos esta propiedad o la API no está disponible.')
       } finally {
@@ -58,7 +65,7 @@ const PropertyDetailPage = () => {
         check_out: booking.check_out,
         guests: Number(booking.guests),
       })
-      setBookingMessage('Reserva confirmada. Puedes verla en Mis reservaciones.')
+      setBookingMessage('Reserva creada. Ve a Mis reservaciones para pagar y confirmar.')
     } catch (err) {
       setBookingError(getApiErrorMessage(err, 'No pudimos completar la reserva'))
     } finally {
@@ -111,6 +118,24 @@ const PropertyDetailPage = () => {
                   <p className="card-meta">
                     {property.city}, {property.country}
                   </p>
+                </article>
+
+                <article className="panel-card" style={{ marginTop: '1rem' }}>
+                  <h2 className="panel-title">
+                    Reseñas {reviews.average ? `· ${reviews.average}/5` : ''}
+                  </h2>
+                  {reviews.total === 0 && (
+                    <p className="panel-text">Esta propiedad aún no tiene reseñas.</p>
+                  )}
+                  <div className="review-list">
+                    {reviews.items.map((review) => (
+                      <div className="review-item" key={review.id}>
+                        <strong>{review.author_name}</strong>
+                        <span className="tag">{review.rating}/5</span>
+                        <p className="panel-text">{review.comment || 'Sin comentario'}</p>
+                      </div>
+                    ))}
+                  </div>
                 </article>
               </div>
 
@@ -167,7 +192,7 @@ const PropertyDetailPage = () => {
                   )}
 
                   <button className="button" type="submit" disabled={bookingLoading}>
-                    {bookingLoading ? 'Reservando...' : isAuthenticated ? 'Confirmar reserva' : 'Inicia sesión para reservar'}
+                    {bookingLoading ? 'Reservando...' : isAuthenticated ? 'Solicitar reserva' : 'Inicia sesión para reservar'}
                   </button>
 
                   {bookingMessage && (

@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }) => {
       loading,
       isAuthenticated: Boolean(token),
       isHost: user?.roles?.includes('anfitrion'),
+      isAdmin: user?.roles?.includes('admin'),
       login,
       register,
       logout,
