@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createProperty, fetchHostReservations, fetchMyProperties, getApiErrorMessage } from '../services/api'
+import { createProperty, fetchHostReservations, fetchMyProperties, getApiErrorMessage, togglePropertyActive } from '../services/api'
 
 const HostPage = () => {
   const { token, user } = useAuth()
@@ -43,6 +42,22 @@ const HostPage = () => {
   useEffect(() => {
     loadMyProperties()
   }, [token])
+
+  const handleToggleActive = async (property) => {
+    setError('')
+    setMessage('')
+    try {
+      await togglePropertyActive(token, property.id, !property.active)
+      setMessage(
+        property.active
+          ? `"${property.title}" quedó desactivada.`
+          : `"${property.title}" quedó activa en el catálogo.`
+      )
+      await loadMyProperties()
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos actualizar la propiedad'))
+    }
+  }
 
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
@@ -200,9 +215,32 @@ const HostPage = () => {
               <p className="panel-text">Aún no has publicado propiedades.</p>
             )}
             {!loading && myProperties.length > 0 && (
-              <div className="property-grid host-property-grid">
-                {myProperties.map((property, index) => (
-                  <PropertyCard key={property.id} property={property} index={index} />
+              <div className="stack host-property-list">
+                {myProperties.map((property) => (
+                  <article className="host-property-item" key={property.id}>
+                    <div>
+                      <h3 className="panel-title">{property.title}</h3>
+                      <p className="card-meta">
+                        {property.city}, {property.country}
+                      </p>
+                      <div className="property-tags">
+                        <span className="tag">{property.active ? 'Activa' : 'Inactiva'}</span>
+                        <span className="tag">${property.price_per_night} / noche</span>
+                      </div>
+                    </div>
+                    <div className="form-actions">
+                      <Link className="button-secondary" to={`/properties/${property.id}`}>
+                        Ver
+                      </Link>
+                      <button
+                        className="button"
+                        type="button"
+                        onClick={() => handleToggleActive(property)}
+                      >
+                        {property.active ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </div>
+                  </article>
                 ))}
               </div>
             )}
@@ -219,6 +257,9 @@ const HostPage = () => {
                   <span>{item.guest_name}</span>
                   <span>{item.check_in} → {item.check_out}</span>
                   <span className="tag">{item.status}</span>
+                  <Link className="button-secondary" to={`/messages?reserva=${item.id}`}>
+                    Mensajes
+                  </Link>
                 </div>
               ))}
             </div>
