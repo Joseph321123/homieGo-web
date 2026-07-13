@@ -97,5 +97,33 @@ export const fetchAdminUsers = async (token) => {
   return data
 }
 
+export const togglePropertyActive = async (token, propertyId, active) => {
+  const { data } = await api.patch(
+    `/api/properties/${propertyId}/active`,
+    { active },
+    authHeaders(token)
+  )
+  return data
+}
+
+export const fetchConversations = async (token) => {
+  const { data } = await api.get('/api/messages', authHeaders(token))
+  return data
+}
+
+export const fetchConversation = async (token, reservationId) => {
+  const { data } = await api.get(`/api/messages/${reservationId}`, authHeaders(token))
+  return data
+}
+
+export const sendMessage = async (token, reservationId, message) => {
+  const { data } = await api.post(
+    `/api/messages/${reservationId}`,
+    { message },
+    authHeaders(token)
+  )
+  return data
+}
+
 export const getApiErrorMessage = (error, fallback = 'Ocurrió un error') =>
   error?.response?.data?.error || fallback

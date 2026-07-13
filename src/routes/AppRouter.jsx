@@ -4,6 +4,7 @@ import AdminPage from '../pages/AdminPage'
 import HomePage from '../pages/HomePage'
 import HostPage from '../pages/HostPage'
 import LoginPage from '../pages/LoginPage'
+import MessagesPage from '../pages/MessagesPage'
 import NotFoundPage from '../pages/NotFoundPage'
 import PropertyDetailPage from '../pages/PropertyDetailPage'
 import PropertiesPage from '../pages/PropertiesPage'
@@ -23,6 +24,14 @@ const AppRouter = () => {
         element={
           <ProtectedRoute>
             <ReservationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/messages"
+        element={
+          <ProtectedRoute>
+            <MessagesPage />
           </ProtectedRoute>
         }
       />

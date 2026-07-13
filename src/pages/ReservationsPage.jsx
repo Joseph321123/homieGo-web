@@ -162,6 +162,9 @@ const ReservationsPage = () => {
                         Cancelar reserva
                       </button>
                     )}
+                    <Link className="button-secondary" to={`/messages?reserva=${reservation.id}`}>
+                      Mensajes
+                    </Link>
                   </div>
 
                   {reservation.status === 'confirmada' && !reservation.has_review && (

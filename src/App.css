@@ -541,7 +541,88 @@
   border-top: 1px solid rgba(0, 40, 98, 0.08);
 }
 
+.filters-bar .field {
+  min-width: 140px;
+}
+
+.host-property-list {
+  margin-top: 1rem;
+}
+
+.host-property-item {
+  display: grid;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 40, 98, 0.08);
+}
+
+.messages-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.4fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.conversation-item {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.85rem;
+  border: 1px solid rgba(0, 40, 98, 0.08);
+  background: #fff;
+  cursor: pointer;
+}
+
+.conversation-item-active {
+  border-color: #1383f9;
+  background: rgba(76, 176, 255, 0.08);
+}
+
+.conversation-preview {
+  font-size: 0.85rem;
+  color: #4b698e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-panel {
+  min-height: 28rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+}
+
+.chat-messages {
+  display: grid;
+  gap: 0.75rem;
+  max-height: 22rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.chat-bubble {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.8rem;
+  background: rgba(0, 40, 98, 0.04);
+  max-width: 85%;
+}
+
+.chat-bubble-mine {
+  justify-self: end;
+  background: rgba(19, 131, 249, 0.12);
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+}
+
 @media (max-width: 900px) {
+  .messages-layout,
   .property-detail-layout,
   .reservation-card {
     grid-template-columns: 1fr;
