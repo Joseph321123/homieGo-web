@@ -33,6 +33,11 @@ export const fetchProfile = async (token) => {
   return data
 }
 
+export const updateProfile = async (token, payload) => {
+  const { data } = await api.patch('/api/auth/me', payload, authHeaders(token))
+  return data
+}
+
 export const createReservation = async (token, payload) => {
   const { data } = await api.post('/api/reservations', payload, authHeaders(token))
   return data
@@ -122,6 +127,36 @@ export const sendMessage = async (token, reservationId, message) => {
     { message },
     authHeaders(token)
   )
+  return data
+}
+
+export const fetchFavorites = async (token) => {
+  const { data } = await api.get('/api/favorites', authHeaders(token))
+  return data
+}
+
+export const fetchFavoriteIds = async (token) => {
+  const { data } = await api.get('/api/favorites/ids', authHeaders(token))
+  return data
+}
+
+export const addFavorite = async (token, propertyId) => {
+  const { data } = await api.post(`/api/favorites/${propertyId}`, {}, authHeaders(token))
+  return data
+}
+
+export const removeFavorite = async (token, propertyId) => {
+  const { data } = await api.delete(`/api/favorites/${propertyId}`, authHeaders(token))
+  return data
+}
+
+export const fetchMyProperty = async (token, propertyId) => {
+  const { data } = await api.get(`/api/properties/mine/${propertyId}`, authHeaders(token))
+  return data
+}
+
+export const updateProperty = async (token, propertyId, payload) => {
+  const { data } = await api.put(`/api/properties/${propertyId}`, payload, authHeaders(token))
   return data
 }
 
