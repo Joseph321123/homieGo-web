@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { fetchProfile, loginUser, registerUser } from '../services/api'
+import { fetchProfile, loginUser, registerUser, updateProfile as updateProfileRequest } from '../services/api'
 
 const AuthContext = createContext(null)
 const STORAGE_KEY = 'homiego_auth'
@@ -65,6 +65,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null)
   }
 
+  const updateProfile = async (payload) => {
+    const response = await updateProfileRequest(token, payload)
+    setUser(response.data)
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ token, user: response.data })
+    )
+    return response.data
+  }
+
   const value = useMemo(
     () => ({
       user,
@@ -76,6 +86,7 @@ export const AuthProvider = ({ children }) => {
       login,
       register,
       logout,
+      updateProfile,
     }),
     [user, token, loading]
   )

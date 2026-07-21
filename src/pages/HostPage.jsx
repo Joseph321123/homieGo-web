@@ -2,7 +2,18 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createProperty, fetchHostReservations, fetchMyProperties, getApiErrorMessage, togglePropertyActive } from '../services/api'
+import { createProperty, fetchHostReservations, fetchMyProperties, fetchMyProperty, getApiErrorMessage, togglePropertyActive, updateProperty } from '../services/api'
+
+const emptyForm = {
+  title: '',
+  description: '',
+  address: '',
+  city: '',
+  country: 'México',
+  price_per_night: '',
+  max_guests: '',
+  photo_url: '',
+}
 
 const HostPage = () => {
   const { token, user } = useAuth()
@@ -10,18 +21,10 @@ const HostPage = () => {
   const [hostReservations, setHostReservations] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    address: '',
-    city: '',
-    country: 'México',
-    price_per_night: '',
-    max_guests: '',
-    photo_url: '',
-  })
+  const [form, setForm] = useState(emptyForm)
 
   const loadMyProperties = async () => {
     try {
@@ -59,6 +62,33 @@ const HostPage = () => {
     }
   }
 
+  const handleEdit = async (propertyId) => {
+    setError('')
+    setMessage('')
+    try {
+      const response = await fetchMyProperty(token, propertyId)
+      const property = response.data
+      setEditingId(property.id)
+      setForm({
+        title: property.title || '',
+        description: property.description || '',
+        address: property.address || '',
+        city: property.city || '',
+        country: property.country || 'México',
+        price_per_night: property.price_per_night || '',
+        max_guests: property.max_guests || '',
+        photo_url: property.photo_url || '',
+      })
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos cargar la propiedad'))
+    }
+  }
+
+  const cancelEdit = () => {
+    setEditingId(null)
+    setForm(emptyForm)
+  }
+
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
@@ -70,25 +100,30 @@ const HostPage = () => {
     setMessage('')
 
     try {
-      await createProperty(token, {
+      const payload = {
         ...form,
         price_per_night: Number(form.price_per_night),
         max_guests: Number(form.max_guests),
-      })
-      setMessage('Propiedad publicada correctamente.')
-      setForm({
-        title: '',
-        description: '',
-        address: '',
-        city: '',
-        country: 'México',
-        price_per_night: '',
-        max_guests: '',
-        photo_url: '',
-      })
+      }
+
+      if (editingId) {
+        await updateProperty(token, editingId, payload)
+        setMessage('Propiedad actualizada correctamente.')
+      } else {
+        await createProperty(token, payload)
+        setMessage('Propiedad publicada correctamente.')
+      }
+
+      setEditingId(null)
+      setForm(emptyForm)
       await loadMyProperties()
     } catch (err) {
-      setError(getApiErrorMessage(err, 'No pudimos publicar la propiedad'))
+      setError(
+        getApiErrorMessage(
+          err,
+          editingId ? 'No pudimos actualizar la propiedad' : 'No pudimos publicar la propiedad'
+        )
+      )
     } finally {
       setSubmitting(false)
     }
@@ -99,9 +134,14 @@ const HostPage = () => {
       <section className="dashboard-grid">
         <form className="panel-card" onSubmit={handleSubmit}>
           <span className="eyebrow">Panel de anfitrión</span>
-          <h1 className="section-title">Publica un hospedaje</h1>
+          <h1 className="section-title">
+            {editingId ? 'Editar hospedaje' : 'Publica un hospedaje'}
+          </h1>
           <p className="page-subtitle">
-            Hola {user?.nombre}, completa el formulario para agregar una propiedad al catálogo.
+            Hola {user?.nombre},{' '}
+            {editingId
+              ? 'modifica los datos de tu propiedad.'
+              : 'completa el formulario para agregar una propiedad al catálogo.'}
           </p>
 
           <div className="stack" style={{ marginTop: '1rem' }}>
@@ -198,11 +238,23 @@ const HostPage = () => {
 
             <div className="form-actions">
               <button className="button" type="submit" disabled={submitting}>
-                {submitting ? 'Publicando...' : 'Publicar propiedad'}
+                {submitting
+                  ? editingId
+                    ? 'Guardando...'
+                    : 'Publicando...'
+                  : editingId
+                    ? 'Guardar cambios'
+                    : 'Publicar propiedad'}
               </button>
-              <Link className="button-secondary" to="/properties">
-                Ver catálogo
-              </Link>
+              {editingId ? (
+                <button className="button-secondary" type="button" onClick={cancelEdit}>
+                  Cancelar edición
+                </button>
+              ) : (
+                <Link className="button-secondary" to="/properties">
+                  Ver catálogo
+                </Link>
+              )}
             </div>
           </div>
         </form>
@@ -232,6 +284,9 @@ const HostPage = () => {
                       <Link className="button-secondary" to={`/properties/${property.id}`}>
                         Ver
                       </Link>
+                      <button className="button-secondary" type="button" onClick={() => handleEdit(property.id)}>
+                        Editar
+                      </button>
                       <button
                         className="button"
                         type="button"

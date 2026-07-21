@@ -621,6 +621,15 @@
   gap: 0.75rem;
 }
 
+.favorite-item {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.profile-form {
+  max-width: 520px;
+}
+
 @media (max-width: 900px) {
   .messages-layout,
   .property-detail-layout,

@@ -5,7 +5,9 @@ const navigation = [
   { to: '/', label: 'Inicio' },
   { to: '/properties', label: 'Propiedades' },
   { to: '/reservations', label: 'Mis reservas', auth: true },
+  { to: '/favorites', label: 'Favoritos', auth: true },
   { to: '/messages', label: 'Mensajes', auth: true },
+  { to: '/profile', label: 'Perfil', auth: true },
   { to: '/host', label: 'Ser anfitrión', host: true },
   { to: '/admin', label: 'Administración', admin: true },
 ]

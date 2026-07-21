@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { formatPrice } from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createReservation, fetchPropertyById, fetchPropertyReviews, getApiErrorMessage } from '../services/api'
+import { createReservation, fetchFavoriteIds, fetchPropertyById, fetchPropertyReviews, addFavorite, removeFavorite, getApiErrorMessage } from '../services/api'
 
 const PropertyDetailPage = () => {
   const { id } = useParams()
@@ -11,6 +11,8 @@ const PropertyDetailPage = () => {
   const { isAuthenticated, token } = useAuth()
   const [property, setProperty] = useState(null)
   const [reviews, setReviews] = useState({ items: [], average: null, total: 0 })
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [favoriteLoading, setFavoriteLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [booking, setBooking] = useState({ check_in: '', check_out: '', guests: 1 })
@@ -33,6 +35,15 @@ const PropertyDetailPage = () => {
           setProperty(propertyResponse.data)
           setReviews(reviewsResponse.data)
         }
+
+        if (isAuthenticated && token) {
+          const favoritesResponse = await fetchFavoriteIds(token)
+          if (active) {
+            setIsFavorite(favoritesResponse.data.map(String).includes(String(id)))
+          }
+        } else if (active) {
+          setIsFavorite(false)
+        }
       } catch {
         if (active) setError('No encontramos esta propiedad o la API no está disponible.')
       } finally {
@@ -45,7 +56,29 @@ const PropertyDetailPage = () => {
     return () => {
       active = false
     }
-  }, [id])
+  }, [id, isAuthenticated, token])
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: `/properties/${id}` } })
+      return
+    }
+
+    setFavoriteLoading(true)
+    try {
+      if (isFavorite) {
+        await removeFavorite(token, id)
+        setIsFavorite(false)
+      } else {
+        await addFavorite(token, id)
+        setIsFavorite(true)
+      }
+    } catch (err) {
+      setBookingError(getApiErrorMessage(err, 'No pudimos actualizar favoritos'))
+    } finally {
+      setFavoriteLoading(false)
+    }
+  }
 
   const handleBooking = async (event) => {
     event.preventDefault()
@@ -105,6 +138,18 @@ const PropertyDetailPage = () => {
                 <div className="property-tags" style={{ marginTop: '1rem' }}>
                   <span className="tag">{property.max_guests} huéspedes</span>
                   <span className="tag">{formatPrice(property.price_per_night)} / noche</span>
+                  <button
+                    className="button-secondary"
+                    type="button"
+                    onClick={handleToggleFavorite}
+                    disabled={favoriteLoading}
+                  >
+                    {favoriteLoading
+                      ? 'Guardando...'
+                      : isFavorite
+                        ? 'Quitar de favoritos'
+                        : 'Guardar en favoritos'}
+                  </button>
                 </div>
 
                 <article className="panel-card" style={{ marginTop: '1.5rem' }}>

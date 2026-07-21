@@ -1,11 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from '../components/ProtectedRoute'
 import AdminPage from '../pages/AdminPage'
+import FavoritesPage from '../pages/FavoritesPage'
 import HomePage from '../pages/HomePage'
 import HostPage from '../pages/HostPage'
 import LoginPage from '../pages/LoginPage'
 import MessagesPage from '../pages/MessagesPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import ProfilePage from '../pages/ProfilePage'
 import PropertyDetailPage from '../pages/PropertyDetailPage'
 import PropertiesPage from '../pages/PropertiesPage'
 import RegisterPage from '../pages/RegisterPage'
@@ -24,6 +26,22 @@ const AppRouter = () => {
         element={
           <ProtectedRoute>
             <ReservationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/favorites"
+        element={
+          <ProtectedRoute>
+            <FavoritesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />
