@@ -10,17 +10,19 @@ const footerItems = ['About us', 'Contact', 'Sucursales']
 const HomePage = () => {
   const navigate = useNavigate()
   const [destination, setDestination] = useState('')
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
   const [featuredProperties, setFeaturedProperties] = useState([])
   const [propertyCount, setPropertyCount] = useState(0)
 
   const handleSearch = (event) => {
     event.preventDefault()
-    const query = destination.trim()
-    if (query) {
-      navigate(`/properties?ciudad=${encodeURIComponent(query)}`)
-      return
-    }
-    navigate('/properties')
+    const params = new URLSearchParams()
+    if (destination.trim()) params.set('ciudad', destination.trim())
+    if (checkIn) params.set('check_in', checkIn)
+    if (checkOut) params.set('check_out', checkOut)
+    const query = params.toString()
+    navigate(query ? `/properties?${query}` : '/properties')
   }
 
   useEffect(() => {
@@ -82,11 +84,21 @@ const HomePage = () => {
               <div className="field-inline">
                 <div className="field">
                   <label htmlFor="ms-checkin">In</label>
-                  <input id="ms-checkin" type="date" />
+                  <input
+                    id="ms-checkin"
+                    type="date"
+                    value={checkIn}
+                    onChange={(event) => setCheckIn(event.target.value)}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="ms-checkout">Out</label>
-                  <input id="ms-checkout" type="date" />
+                  <input
+                    id="ms-checkout"
+                    type="date"
+                    value={checkOut}
+                    onChange={(event) => setCheckOut(event.target.value)}
+                  />
                 </div>
               </div>
               <button className="button" type="submit">

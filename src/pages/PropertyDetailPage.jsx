@@ -3,7 +3,16 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { formatPrice } from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createReservation, fetchFavoriteIds, fetchPropertyById, fetchPropertyReviews, addFavorite, removeFavorite, getApiErrorMessage } from '../services/api'
+import {
+  addFavorite,
+  checkPropertyAvailability,
+  createReservation,
+  fetchFavoriteIds,
+  fetchPropertyById,
+  fetchPropertyReviews,
+  getApiErrorMessage,
+  removeFavorite,
+} from '../services/api'
 
 const PropertyDetailPage = () => {
   const { id } = useParams()
@@ -11,8 +20,10 @@ const PropertyDetailPage = () => {
   const { isAuthenticated, token } = useAuth()
   const [property, setProperty] = useState(null)
   const [reviews, setReviews] = useState({ items: [], average: null, total: 0 })
+  const [activePhoto, setActivePhoto] = useState('')
   const [isFavorite, setIsFavorite] = useState(false)
   const [favoriteLoading, setFavoriteLoading] = useState(false)
+  const [availabilityNote, setAvailabilityNote] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [booking, setBooking] = useState({ check_in: '', check_out: '', guests: 1 })
@@ -34,6 +45,9 @@ const PropertyDetailPage = () => {
         if (active) {
           setProperty(propertyResponse.data)
           setReviews(reviewsResponse.data)
+          setActivePhoto(
+            propertyResponse.data.photos?.[0]?.url || propertyResponse.data.photo_url || ''
+          )
         }
 
         if (isAuthenticated && token) {
@@ -57,6 +71,28 @@ const PropertyDetailPage = () => {
       active = false
     }
   }, [id, isAuthenticated, token])
+
+  useEffect(() => {
+    const verifyDates = async () => {
+      if (!booking.check_in || !booking.check_out) {
+        setAvailabilityNote('')
+        return
+      }
+
+      try {
+        const response = await checkPropertyAvailability(id, booking.check_in, booking.check_out)
+        setAvailabilityNote(
+          response.data.available
+            ? 'Fechas disponibles para reservar.'
+            : 'Esas fechas ya están ocupadas.'
+        )
+      } catch {
+        setAvailabilityNote('')
+      }
+    }
+
+    verifyDates()
+  }, [id, booking.check_in, booking.check_out])
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
@@ -92,6 +128,12 @@ const PropertyDetailPage = () => {
 
     setBookingLoading(true)
     try {
+      const availability = await checkPropertyAvailability(id, booking.check_in, booking.check_out)
+      if (!availability.data.available) {
+        setBookingError('Las fechas seleccionadas no están disponibles')
+        return
+      }
+
       await createReservation(token, {
         property_id: Number(id),
         check_in: booking.check_in,
@@ -106,6 +148,12 @@ const PropertyDetailPage = () => {
     }
   }
 
+  const photos = property?.photos?.length
+    ? property.photos
+    : property?.photo_url
+      ? [{ id: 'main', url: property.photo_url }]
+      : []
+
   return (
     <SiteShell>
       <section className="section">
@@ -119,13 +167,28 @@ const PropertyDetailPage = () => {
         {!loading && !error && property && (
           <div className="property-detail">
             <div
-              className={`property-detail-photo${property.photo_url ? ' property-photo-image' : ''}`}
+              className={`property-detail-photo${activePhoto ? ' property-photo-image' : ''}`}
               style={
-                property.photo_url
-                  ? { backgroundImage: `url(${property.photo_url})` }
+                activePhoto
+                  ? { backgroundImage: `url(${activePhoto})` }
                   : { '--photo': 'linear-gradient(135deg, #002862, #1383f9)' }
               }
             />
+
+            {photos.length > 1 && (
+              <div className="photo-thumbs">
+                {photos.map((photo) => (
+                  <button
+                    key={photo.id}
+                    type="button"
+                    className={`photo-thumb${activePhoto === photo.url ? ' photo-thumb-active' : ''}`}
+                    style={{ backgroundImage: `url(${photo.url})` }}
+                    onClick={() => setActivePhoto(photo.url)}
+                    aria-label="Cambiar foto"
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="property-detail-layout">
               <div className="property-detail-content">
@@ -163,6 +226,21 @@ const PropertyDetailPage = () => {
                   <p className="card-meta">
                     {property.city}, {property.country}
                   </p>
+                </article>
+
+                <article className="panel-card" style={{ marginTop: '1rem' }}>
+                  <h2 className="panel-title">Disponibilidad</h2>
+                  {(property.blocked_dates || []).length === 0 ? (
+                    <p className="panel-text">Sin fechas bloqueadas próximas.</p>
+                  ) : (
+                    <div className="property-tags">
+                      {property.blocked_dates.map((range) => (
+                        <span className="tag" key={`${range.check_in}-${range.check_out}`}>
+                          {range.check_in} → {range.check_out} ({range.status})
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </article>
 
                 <article className="panel-card" style={{ marginTop: '1rem' }}>
@@ -231,13 +309,18 @@ const PropertyDetailPage = () => {
                     />
                   </div>
 
+                  {availabilityNote && <p className="state-message">{availabilityNote}</p>}
                   {bookingMessage && <p className="state-message">{bookingMessage}</p>}
                   {bookingError && (
                     <p className="state-message state-message-error">{bookingError}</p>
                   )}
 
                   <button className="button" type="submit" disabled={bookingLoading}>
-                    {bookingLoading ? 'Reservando...' : isAuthenticated ? 'Solicitar reserva' : 'Inicia sesión para reservar'}
+                    {bookingLoading
+                      ? 'Reservando...'
+                      : isAuthenticated
+                        ? 'Solicitar reserva'
+                        : 'Inicia sesión para reservar'}
                   </button>
 
                   {bookingMessage && (

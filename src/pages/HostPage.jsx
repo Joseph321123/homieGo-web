@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createProperty, fetchHostReservations, fetchMyProperties, fetchMyProperty, getApiErrorMessage, togglePropertyActive, updateProperty } from '../services/api'
+import { createProperty, fetchHostReservations, fetchHostStats, fetchMyProperties, fetchMyProperty, getApiErrorMessage, togglePropertyActive, updateProperty, addPropertyPhoto } from '../services/api'
 
 const emptyForm = {
   title: '',
@@ -19,9 +19,11 @@ const HostPage = () => {
   const { token, user } = useAuth()
   const [myProperties, setMyProperties] = useState([])
   const [hostReservations, setHostReservations] = useState([])
+  const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [editingId, setEditingId] = useState(null)
+  const [extraPhotoUrl, setExtraPhotoUrl] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [form, setForm] = useState(emptyForm)
@@ -29,12 +31,14 @@ const HostPage = () => {
   const loadMyProperties = async () => {
     try {
       setLoading(true)
-      const [propertiesResponse, reservationsResponse] = await Promise.all([
+      const [propertiesResponse, reservationsResponse, statsResponse] = await Promise.all([
         fetchMyProperties(token),
         fetchHostReservations(token),
+        fetchHostStats(token),
       ])
       setMyProperties(propertiesResponse.data)
       setHostReservations(reservationsResponse.data)
+      setStats(statsResponse.data)
     } catch {
       setError('No pudimos cargar tus propiedades.')
     } finally {
@@ -45,6 +49,19 @@ const HostPage = () => {
   useEffect(() => {
     loadMyProperties()
   }, [token])
+
+  const handleAddExtraPhoto = async () => {
+    if (!editingId || !extraPhotoUrl.trim()) return
+    setError('')
+    setMessage('')
+    try {
+      await addPropertyPhoto(token, editingId, { url: extraPhotoUrl, is_primary: false })
+      setExtraPhotoUrl('')
+      setMessage('Foto agregada a la galería.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos agregar la foto'))
+    }
+  }
 
   const handleToggleActive = async (property) => {
     setError('')
@@ -131,6 +148,28 @@ const HostPage = () => {
 
   return (
     <SiteShell>
+      <section className="section">
+        {stats && (
+          <div className="stats-grid" style={{ marginBottom: '1.5rem' }}>
+            <article className="stat-card">
+              <span className="stat-value">{stats.active_properties}</span>
+              <span className="stat-label">Propiedades activas</span>
+            </article>
+            <article className="stat-card">
+              <span className="stat-value">{stats.confirmed_reservations}</span>
+              <span className="stat-label">Reservas confirmadas</span>
+            </article>
+            <article className="stat-card">
+              <span className="stat-value">${Number(stats.earnings).toLocaleString('es-MX')}</span>
+              <span className="stat-label">Ganancias aprobadas</span>
+            </article>
+            <article className="stat-card">
+              <span className="stat-value">{stats.average_rating}</span>
+              <span className="stat-label">Promedio de reseñas</span>
+            </article>
+          </div>
+        )}
+
       <section className="dashboard-grid">
         <form className="panel-card" onSubmit={handleSubmit}>
           <span className="eyebrow">Panel de anfitrión</span>
@@ -233,6 +272,24 @@ const HostPage = () => {
               />
             </div>
 
+            {editingId && (
+              <div className="field">
+                <label htmlFor="extra-photo">Agregar foto extra a la galería</label>
+                <div className="chat-form">
+                  <input
+                    id="extra-photo"
+                    type="url"
+                    placeholder="https://..."
+                    value={extraPhotoUrl}
+                    onChange={(event) => setExtraPhotoUrl(event.target.value)}
+                  />
+                  <button className="button-secondary" type="button" onClick={handleAddExtraPhoto}>
+                    Agregar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {message && <p className="state-message">{message}</p>}
             {error && <p className="state-message state-message-error">{error}</p>}
 
@@ -320,6 +377,7 @@ const HostPage = () => {
             </div>
           </article>
         </aside>
+      </section>
       </section>
     </SiteShell>
   )

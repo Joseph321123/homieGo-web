@@ -10,12 +10,16 @@ const PropertiesPage = () => {
   const minPriceQuery = searchParams.get('min_precio') || ''
   const maxPriceQuery = searchParams.get('max_precio') || ''
   const guestsQuery = searchParams.get('huespedes') || ''
+  const checkInQuery = searchParams.get('check_in') || ''
+  const checkOutQuery = searchParams.get('check_out') || ''
 
   const [filters, setFilters] = useState({
     city: cityQuery,
     min_precio: minPriceQuery,
     max_precio: maxPriceQuery,
     huespedes: guestsQuery,
+    check_in: checkInQuery,
+    check_out: checkOutQuery,
   })
   const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,8 +31,10 @@ const PropertiesPage = () => {
       min_precio: minPriceQuery,
       max_precio: maxPriceQuery,
       huespedes: guestsQuery,
+      check_in: checkInQuery,
+      check_out: checkOutQuery,
     })
-  }, [cityQuery, minPriceQuery, maxPriceQuery, guestsQuery])
+  }, [cityQuery, minPriceQuery, maxPriceQuery, guestsQuery, checkInQuery, checkOutQuery])
 
   useEffect(() => {
     let active = true
@@ -42,6 +48,8 @@ const PropertiesPage = () => {
         if (minPriceQuery) params.min_precio = minPriceQuery
         if (maxPriceQuery) params.max_precio = maxPriceQuery
         if (guestsQuery) params.huespedes = guestsQuery
+        if (checkInQuery) params.check_in = checkInQuery
+        if (checkOutQuery) params.check_out = checkOutQuery
 
         const response = await fetchProperties(params)
         if (active) setProperties(response.data)
@@ -59,7 +67,7 @@ const PropertiesPage = () => {
     return () => {
       active = false
     }
-  }, [cityQuery, minPriceQuery, maxPriceQuery, guestsQuery])
+  }, [cityQuery, minPriceQuery, maxPriceQuery, guestsQuery, checkInQuery, checkOutQuery])
 
   const updateFilter = (field) => (event) => {
     setFilters((current) => ({ ...current, [field]: event.target.value }))
@@ -72,15 +80,25 @@ const PropertiesPage = () => {
     if (filters.min_precio) next.min_precio = filters.min_precio
     if (filters.max_precio) next.max_precio = filters.max_precio
     if (filters.huespedes) next.huespedes = filters.huespedes
+    if (filters.check_in) next.check_in = filters.check_in
+    if (filters.check_out) next.check_out = filters.check_out
     setSearchParams(next)
   }
 
   const clearFilters = () => {
-    setFilters({ city: '', min_precio: '', max_precio: '', huespedes: '' })
+    setFilters({
+      city: '',
+      min_precio: '',
+      max_precio: '',
+      huespedes: '',
+      check_in: '',
+      check_out: '',
+    })
     setSearchParams({})
   }
 
-  const hasFilters = cityQuery || minPriceQuery || maxPriceQuery || guestsQuery
+  const hasFilters =
+    cityQuery || minPriceQuery || maxPriceQuery || guestsQuery || checkInQuery || checkOutQuery
 
   return (
     <SiteShell>
@@ -90,7 +108,7 @@ const PropertiesPage = () => {
             <span className="eyebrow">Catálogo conectado</span>
             <h1 className="section-title">Explora propiedades disponibles</h1>
             <p className="page-subtitle">
-              Filtra por ciudad, precio y capacidad de huéspedes.
+              Filtra por ciudad, fechas, precio y capacidad de huéspedes.
             </p>
           </div>
         </div>
@@ -104,6 +122,24 @@ const PropertiesPage = () => {
               placeholder="Ej. Monterrey"
               value={filters.city}
               onChange={updateFilter('city')}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="check-in-filter">Entrada</label>
+            <input
+              id="check-in-filter"
+              type="date"
+              value={filters.check_in}
+              onChange={updateFilter('check_in')}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="check-out-filter">Salida</label>
+            <input
+              id="check-out-filter"
+              type="date"
+              value={filters.check_out}
+              onChange={updateFilter('check_out')}
             />
           </div>
           <div className="field">
@@ -152,6 +188,9 @@ const PropertiesPage = () => {
         {hasFilters && !loading && !error && (
           <p className="state-message">
             Resultados filtrados: <strong>{properties.length}</strong>
+            {checkInQuery && checkOutQuery
+              ? ` · Disponibles del ${checkInQuery} al ${checkOutQuery}`
+              : ''}
           </p>
         )}
 
