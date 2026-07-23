@@ -4,8 +4,12 @@ import { formatPrice } from '../components/PropertyCard'
 import { useAuth } from '../context/AuthContext'
 import {
   fetchAdminDashboard,
+  fetchAdminProperties,
   fetchAdminReservations,
   fetchAdminUsers,
+  getApiErrorMessage,
+  setAdminPropertyActive,
+  setAdminUserActive,
 } from '../services/api'
 
 const AdminPage = () => {
@@ -13,26 +17,57 @@ const AdminPage = () => {
   const [stats, setStats] = useState(null)
   const [reservations, setReservations] = useState([])
   const [users, setUsers] = useState([])
+  const [properties, setProperties] = useState([])
   const [loading, setLoading] = useState(true)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  const loadAdmin = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const [dashboard, reservationsData, usersData, propertiesData] = await Promise.all([
+        fetchAdminDashboard(token),
+        fetchAdminReservations(token),
+        fetchAdminUsers(token),
+        fetchAdminProperties(token),
+      ])
+      setStats(dashboard.data)
+      setReservations(reservationsData.data)
+      setUsers(usersData.data)
+      setProperties(propertiesData.data)
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos cargar el panel'))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const loadAdmin = async () => {
-      try {
-        const [dashboard, reservationsData, usersData] = await Promise.all([
-          fetchAdminDashboard(token),
-          fetchAdminReservations(token),
-          fetchAdminUsers(token),
-        ])
-        setStats(dashboard.data)
-        setReservations(reservationsData.data)
-        setUsers(usersData.data)
-      } finally {
-        setLoading(false)
-      }
-    }
-
     loadAdmin()
   }, [token])
+
+  const handleToggleUser = async (user) => {
+    setMessage('')
+    try {
+      await setAdminUserActive(token, user.id, !user.activo)
+      setMessage(`Usuario ${user.nombre} actualizado.`)
+      await loadAdmin()
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos actualizar el usuario'))
+    }
+  }
+
+  const handleToggleProperty = async (property) => {
+    setMessage('')
+    try {
+      await setAdminPropertyActive(token, property.id, !property.active)
+      setMessage(`Propiedad ${property.title} actualizada.`)
+      await loadAdmin()
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos actualizar la propiedad'))
+    }
+  }
 
   return (
     <SiteShell>
@@ -42,11 +77,13 @@ const AdminPage = () => {
             <span className="eyebrow">Control de plataforma</span>
             <h1 className="section-title">Panel de administración</h1>
             <p className="page-subtitle">
-              Métricas en tiempo real de usuarios, propiedades, reservas y pagos.
+              Métricas, moderación de usuarios y control de propiedades.
             </p>
           </div>
         </div>
 
+        {message && <p className="state-message">{message}</p>}
+        {error && <p className="state-message state-message-error">{error}</p>}
         {loading && <p className="state-message">Cargando panel...</p>}
 
         {!loading && stats && (
@@ -94,6 +131,35 @@ const AdminPage = () => {
                       <span>{item.nombre}</span>
                       <span>{item.email}</span>
                       <span className="tag">{item.roles?.join(', ')}</span>
+                      <span className="tag">{item.activo ? 'activo' : 'inactivo'}</span>
+                      <button
+                        className="button-secondary"
+                        type="button"
+                        onClick={() => handleToggleUser(item)}
+                      >
+                        {item.activo ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className="panel-card">
+                <h2 className="panel-title">Propiedades</h2>
+                <div className="admin-table">
+                  {properties.map((item) => (
+                    <div className="admin-row" key={item.id}>
+                      <span>{item.title}</span>
+                      <span>{item.host_name}</span>
+                      <span>{item.city}</span>
+                      <span className="tag">{item.active ? 'activa' : 'inactiva'}</span>
+                      <button
+                        className="button-secondary"
+                        type="button"
+                        onClick={() => handleToggleProperty(item)}
+                      >
+                        {item.active ? 'Desactivar' : 'Activar'}
+                      </button>
                     </div>
                   ))}
                 </div>

@@ -38,6 +38,11 @@ export const updateProfile = async (token, payload) => {
   return data
 }
 
+export const becomeHost = async (token) => {
+  const { data } = await api.post('/api/auth/become-host', {}, authHeaders(token))
+  return data
+}
+
 export const createReservation = async (token, payload) => {
   const { data } = await api.post('/api/reservations', payload, authHeaders(token))
   return data
@@ -157,6 +162,56 @@ export const fetchMyProperty = async (token, propertyId) => {
 
 export const updateProperty = async (token, propertyId, payload) => {
   const { data } = await api.put(`/api/properties/${propertyId}`, payload, authHeaders(token))
+  return data
+}
+
+export const fetchHostStats = async (token) => {
+  const { data } = await api.get('/api/host/stats', authHeaders(token))
+  return data
+}
+
+export const checkPropertyAvailability = async (propertyId, checkIn, checkOut) => {
+  const { data } = await api.get(`/api/properties/${propertyId}/availability/check`, {
+    params: { check_in: checkIn, check_out: checkOut },
+  })
+  return data
+}
+
+export const addPropertyPhoto = async (token, propertyId, payload) => {
+  const { data } = await api.post(`/api/properties/${propertyId}/photos`, payload, authHeaders(token))
+  return data
+}
+
+export const removePropertyPhoto = async (token, photoId) => {
+  const { data } = await api.delete(`/api/photos/${photoId}`, authHeaders(token))
+  return data
+}
+
+export const setPrimaryPhoto = async (token, photoId) => {
+  const { data } = await api.patch(`/api/photos/${photoId}/primary`, {}, authHeaders(token))
+  return data
+}
+
+export const fetchAdminProperties = async (token) => {
+  const { data } = await api.get('/api/admin/properties', authHeaders(token))
+  return data
+}
+
+export const setAdminUserActive = async (token, userId, active) => {
+  const { data } = await api.patch(
+    `/api/admin/users/${userId}/active`,
+    { active },
+    authHeaders(token)
+  )
+  return data
+}
+
+export const setAdminPropertyActive = async (token, propertyId, active) => {
+  const { data } = await api.patch(
+    `/api/admin/properties/${propertyId}/active`,
+    { active },
+    authHeaders(token)
+  )
   return data
 }
 

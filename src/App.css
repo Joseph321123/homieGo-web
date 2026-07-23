@@ -630,6 +630,39 @@
   max-width: 520px;
 }
 
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.photo-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0.85rem 0 1.25rem;
+}
+
+.photo-thumb {
+  width: 72px;
+  height: 56px;
+  border: 2px solid transparent;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+}
+
+.photo-thumb-active {
+  border-color: #1383f9;
+}
+
+@media (max-width: 900px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .messages-layout,
   .property-detail-layout,
