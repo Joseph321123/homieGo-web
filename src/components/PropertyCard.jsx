@@ -20,6 +20,8 @@ const PropertyCard = ({ property, index = 0 }) => {
     ? { backgroundImage: `url(${property.photo_url})` }
     : { '--photo': gradients[index % gradients.length] }
 
+  const rating = property.rating_avg ? Number(property.rating_avg) : null
+
   return (
     <Link className="property-card-link" to={`/properties/${property.id}`}>
       <article className="property-card">
@@ -29,7 +31,14 @@ const PropertyCard = ({ property, index = 0 }) => {
         />
         <div className="stack">
           <div>
-            <h3 className="property-title">{property.title}</h3>
+            <div className="property-card-heading">
+              <h3 className="property-title">{property.title}</h3>
+              {rating != null && (
+                <span className="rating-pill" title={`${property.reviews_count || 0} reseñas`}>
+                  ★ {rating.toFixed(1)}
+                </span>
+              )}
+            </div>
             <p className="card-meta">
               {property.city}, {property.country}
             </p>

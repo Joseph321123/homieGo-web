@@ -121,7 +121,12 @@ const MessagesPage = () => {
                     }`}
                     onClick={() => handleSelect(item.reservation_id)}
                   >
-                    <strong>{item.property_title}</strong>
+                    <div className="conversation-item-header">
+                      <strong>{item.property_title}</strong>
+                      {item.unread_count > 0 && (
+                        <span className="nav-badge">{item.unread_count}</span>
+                      )}
+                    </div>
                     <span className="card-meta">
                       Con {item.other_user_name} · {item.city}
                     </span>

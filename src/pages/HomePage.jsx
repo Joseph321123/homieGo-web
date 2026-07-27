@@ -28,9 +28,9 @@ const HomePage = () => {
   useEffect(() => {
     const loadFeatured = async () => {
       try {
-        const response = await fetchProperties()
+        const response = await fetchProperties({ limit: 3, sort: 'rating_desc' })
         setPropertyCount(response.total)
-        setFeaturedProperties(response.data.slice(0, 3))
+        setFeaturedProperties(response.data || [])
       } catch {
         setFeaturedProperties([])
       }

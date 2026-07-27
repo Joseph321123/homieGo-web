@@ -2,21 +2,33 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { getApiErrorMessage } from '../services/api'
+import { changePassword, getApiErrorMessage } from '../services/api'
 
 const ProfilePage = () => {
-  const { user, updateProfile, becomeHost, isHost } = useAuth()
+  const { user, token, updateProfile, becomeHost, isHost } = useAuth()
   const [form, setForm] = useState({
     nombre: user?.nombre || '',
     telefono: user?.telefono || '',
   })
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: '',
+  })
   const [loading, setLoading] = useState(false)
+  const [passwordLoading, setPasswordLoading] = useState(false)
   const [hostLoading, setHostLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [passwordMessage, setPasswordMessage] = useState('')
   const [error, setError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
 
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
+  }
+
+  const updatePasswordField = (field) => (event) => {
+    setPasswordForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
   const handleSubmit = async (event) => {
@@ -32,6 +44,36 @@ const ProfilePage = () => {
       setError(getApiErrorMessage(err, 'No pudimos actualizar tu perfil'))
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault()
+    setPasswordLoading(true)
+    setPasswordMessage('')
+    setPasswordError('')
+
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      setPasswordError('La confirmación no coincide con la nueva contraseña')
+      setPasswordLoading(false)
+      return
+    }
+
+    try {
+      await changePassword(token, {
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password,
+      })
+      setPasswordForm({
+        current_password: '',
+        new_password: '',
+        confirm_password: '',
+      })
+      setPasswordMessage('Contraseña actualizada correctamente.')
+    } catch (err) {
+      setPasswordError(getApiErrorMessage(err, 'No pudimos cambiar la contraseña'))
+    } finally {
+      setPasswordLoading(false)
     }
   }
 
@@ -57,7 +99,7 @@ const ProfilePage = () => {
             <span className="eyebrow">Tu cuenta</span>
             <h1 className="section-title">Mi perfil</h1>
             <p className="page-subtitle">
-              Actualiza tu información personal y gestiona tu rol en HomieGo.
+              Actualiza tu información personal, contraseña y rol en HomieGo.
             </p>
           </div>
         </div>
@@ -129,6 +171,52 @@ const ProfilePage = () => {
             )}
           </aside>
         </div>
+
+        <form className="panel-card profile-form" style={{ marginTop: '1.25rem' }} onSubmit={handlePasswordSubmit}>
+          <h2 className="panel-title">Cambiar contraseña</h2>
+          <div className="stack" style={{ marginTop: '1rem' }}>
+            <div className="field">
+              <label htmlFor="current-password">Contraseña actual</label>
+              <input
+                id="current-password"
+                type="password"
+                value={passwordForm.current_password}
+                onChange={updatePasswordField('current_password')}
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="split-grid">
+              <div className="field">
+                <label htmlFor="new-password">Nueva contraseña</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={passwordForm.new_password}
+                  onChange={updatePasswordField('new_password')}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="confirm-password">Confirmar nueva</label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={passwordForm.confirm_password}
+                  onChange={updatePasswordField('confirm_password')}
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+            {passwordMessage && <p className="state-message">{passwordMessage}</p>}
+            {passwordError && <p className="state-message state-message-error">{passwordError}</p>}
+            <button className="button" type="submit" disabled={passwordLoading}>
+              {passwordLoading ? 'Actualizando...' : 'Actualizar contraseña'}
+            </button>
+          </div>
+        </form>
       </section>
     </SiteShell>
   )

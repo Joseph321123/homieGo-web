@@ -215,5 +215,44 @@ export const setAdminPropertyActive = async (token, propertyId, active) => {
   return data
 }
 
+export const fetchAmenities = async () => {
+  const { data } = await api.get('/api/amenities')
+  return data
+}
+
+export const fetchNotifications = async (token, params = {}) => {
+  const { data } = await api.get('/api/notifications', { ...authHeaders(token), params })
+  return data
+}
+
+export const fetchNotificationsUnreadCount = async (token) => {
+  const { data } = await api.get('/api/notifications/unread-count', authHeaders(token))
+  return data
+}
+
+export const markNotificationRead = async (token, notificationId) => {
+  const { data } = await api.patch(
+    `/api/notifications/${notificationId}/read`,
+    {},
+    authHeaders(token)
+  )
+  return data
+}
+
+export const markAllNotificationsRead = async (token) => {
+  const { data } = await api.patch('/api/notifications/read-all', {}, authHeaders(token))
+  return data
+}
+
+export const fetchMessagesUnreadCount = async (token) => {
+  const { data } = await api.get('/api/messages/unread-count', authHeaders(token))
+  return data
+}
+
+export const changePassword = async (token, payload) => {
+  const { data } = await api.post('/api/auth/change-password', payload, authHeaders(token))
+  return data
+}
+
 export const getApiErrorMessage = (error, fallback = 'Ocurrió un error') =>
   error?.response?.data?.error || fallback
