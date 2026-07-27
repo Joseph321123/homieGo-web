@@ -70,6 +70,9 @@
   color: #35547d;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   transition:
     transform 160ms ease,
     background-color 160ms ease,
@@ -1035,4 +1038,119 @@
     right: 0;
     border-right-color: var(--border);
   }
+}
+
+.nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.35rem;
+  background: #1383f9;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.property-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.rating-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.28rem 0.55rem;
+  background: rgba(0, 40, 98, 0.08);
+  color: #002862;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.amenities-filter {
+  margin: 0.75rem 0 1.25rem;
+}
+
+.amenities-filter-label {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #002862;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.amenities-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.amenity-chip {
+  border: 1px solid rgba(0, 40, 98, 0.18);
+  background: #fff;
+  color: #35547d;
+  padding: 0.45rem 0.75rem;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.amenity-chip:hover,
+.amenity-chip-active {
+  background: rgba(19, 131, 249, 0.12);
+  border-color: #1383f9;
+  color: #002862;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.notifications-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.notification-item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.notification-item-unread {
+  border-color: rgba(19, 131, 249, 0.35);
+  background: rgba(19, 131, 249, 0.06);
+}
+
+.notification-meta {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.conversation-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }

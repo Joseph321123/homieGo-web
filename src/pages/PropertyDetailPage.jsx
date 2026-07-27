@@ -201,6 +201,12 @@ const PropertyDetailPage = () => {
                 <div className="property-tags" style={{ marginTop: '1rem' }}>
                   <span className="tag">{property.max_guests} huéspedes</span>
                   <span className="tag">{formatPrice(property.price_per_night)} / noche</span>
+                  {property.rating_avg != null && (
+                    <span className="rating-pill">
+                      ★ {Number(property.rating_avg).toFixed(1)}
+                      {property.reviews_count ? ` · ${property.reviews_count}` : ''}
+                    </span>
+                  )}
                   <button
                     className="button-secondary"
                     type="button"
@@ -219,6 +225,19 @@ const PropertyDetailPage = () => {
                   <h2 className="panel-title">Descripción</h2>
                   <p className="panel-text">{property.description}</p>
                 </article>
+
+                {(property.amenities || []).length > 0 && (
+                  <article className="panel-card" style={{ marginTop: '1rem' }}>
+                    <h2 className="panel-title">Comodidades</h2>
+                    <div className="property-tags">
+                      {property.amenities.map((amenity) => (
+                        <span className="tag" key={amenity.id}>
+                          {amenity.name}
+                        </span>
+                      ))}
+                    </div>
+                  </article>
+                )}
 
                 <article className="panel-card" style={{ marginTop: '1rem' }}>
                   <h2 className="panel-title">Ubicación</h2>

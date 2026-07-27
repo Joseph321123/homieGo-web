@@ -2,7 +2,18 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { createProperty, fetchHostReservations, fetchHostStats, fetchMyProperties, fetchMyProperty, getApiErrorMessage, togglePropertyActive, updateProperty, addPropertyPhoto } from '../services/api'
+import {
+  addPropertyPhoto,
+  createProperty,
+  fetchAmenities,
+  fetchHostReservations,
+  fetchHostStats,
+  fetchMyProperties,
+  fetchMyProperty,
+  getApiErrorMessage,
+  togglePropertyActive,
+  updateProperty,
+} from '../services/api'
 
 const emptyForm = {
   title: '',
@@ -13,6 +24,7 @@ const emptyForm = {
   price_per_night: '',
   max_guests: '',
   photo_url: '',
+  amenity_ids: [],
 }
 
 const HostPage = () => {
@@ -27,6 +39,13 @@ const HostPage = () => {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [form, setForm] = useState(emptyForm)
+  const [amenities, setAmenities] = useState([])
+
+  useEffect(() => {
+    fetchAmenities()
+      .then((response) => setAmenities(response.data || []))
+      .catch(() => setAmenities([]))
+  }, [])
 
   const loadMyProperties = async () => {
     try {
@@ -95,6 +114,7 @@ const HostPage = () => {
         price_per_night: property.price_per_night || '',
         max_guests: property.max_guests || '',
         photo_url: property.photo_url || '',
+        amenity_ids: (property.amenities || []).map((item) => item.id),
       })
     } catch (err) {
       setError(getApiErrorMessage(err, 'No pudimos cargar la propiedad'))
@@ -110,6 +130,18 @@ const HostPage = () => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
+  const toggleAmenity = (amenityId) => {
+    setForm((current) => {
+      const exists = current.amenity_ids.includes(amenityId)
+      return {
+        ...current,
+        amenity_ids: exists
+          ? current.amenity_ids.filter((id) => id !== amenityId)
+          : [...current.amenity_ids, amenityId],
+      }
+    })
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setSubmitting(true)
@@ -121,6 +153,7 @@ const HostPage = () => {
         ...form,
         price_per_night: Number(form.price_per_night),
         max_guests: Number(form.max_guests),
+        amenity_ids: form.amenity_ids,
       }
 
       if (editingId) {
@@ -271,6 +304,27 @@ const HostPage = () => {
                 onChange={updateField('photo_url')}
               />
             </div>
+
+            {amenities.length > 0 && (
+              <div className="field">
+                <span className="amenities-filter-label">Comodidades</span>
+                <div className="amenities-chips" style={{ marginTop: '0.5rem' }}>
+                  {amenities.map((amenity) => {
+                    const active = form.amenity_ids.includes(amenity.id)
+                    return (
+                      <button
+                        key={amenity.id}
+                        type="button"
+                        className={active ? 'amenity-chip amenity-chip-active' : 'amenity-chip'}
+                        onClick={() => toggleAmenity(amenity.id)}
+                      >
+                        {amenity.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {editingId && (
               <div className="field">

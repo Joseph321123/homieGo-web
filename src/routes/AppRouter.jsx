@@ -7,6 +7,7 @@ import HostPage from '../pages/HostPage'
 import LoginPage from '../pages/LoginPage'
 import MessagesPage from '../pages/MessagesPage'
 import NotFoundPage from '../pages/NotFoundPage'
+import NotificationsPage from '../pages/NotificationsPage'
 import ProfilePage from '../pages/ProfilePage'
 import PropertyDetailPage from '../pages/PropertyDetailPage'
 import PropertiesPage from '../pages/PropertiesPage'
@@ -50,6 +51,14 @@ const AppRouter = () => {
         element={
           <ProtectedRoute>
             <MessagesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         }
       />
