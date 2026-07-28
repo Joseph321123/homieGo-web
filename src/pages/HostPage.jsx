@@ -14,6 +14,7 @@ import {
   togglePropertyActive,
   updateProperty,
 } from '../services/api'
+import { formatPaymentStatus, formatReservationStatus } from '../utils/labels'
 
 const emptyForm = {
   title: '',
@@ -375,7 +376,11 @@ const HostPage = () => {
             <h2 className="panel-title">Tus propiedades</h2>
             {loading && <p className="panel-text">Cargando...</p>}
             {!loading && myProperties.length === 0 && (
-              <p className="panel-text">Aún no has publicado propiedades.</p>
+              <div className="empty-panel">
+                <p className="panel-text">
+                  Aún no has publicado propiedades. Completa el formulario de la izquierda para publicar tu primer hospedaje.
+                </p>
+              </div>
             )}
             {!loading && myProperties.length > 0 && (
               <div className="stack host-property-list">
@@ -414,7 +419,14 @@ const HostPage = () => {
           <article className="panel-card">
             <h2 className="panel-title">Reservas en tus propiedades</h2>
             {hostReservations.length === 0 && (
-              <p className="panel-text">Aún no tienes reservas como anfitrión.</p>
+              <div className="empty-panel">
+                <p className="panel-text">
+                  Aún no tienes reservas como anfitrión. Cuando un huésped reserve, la verás aquí.
+                </p>
+                <Link className="button-secondary" to="/properties">
+                  Ver cómo se muestran en el catálogo
+                </Link>
+              </div>
             )}
             <div className="admin-table">
               {hostReservations.map((item) => (
@@ -422,7 +434,8 @@ const HostPage = () => {
                   <span>{item.property_title}</span>
                   <span>{item.guest_name}</span>
                   <span>{item.check_in} → {item.check_out}</span>
-                  <span className="tag">{item.status}</span>
+                  <span className="tag">{formatReservationStatus(item.status)}</span>
+                  <span className="tag">{formatPaymentStatus(item.payment_status)}</span>
                   <Link className="button-secondary" to={`/messages?reserva=${item.id}`}>
                     Mensajes
                   </Link>

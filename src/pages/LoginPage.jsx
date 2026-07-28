@@ -12,11 +12,18 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showDemo, setShowDemo] = useState(false)
 
   const redirectTo = location.state?.from || '/'
 
   if (isAuthenticated) {
     return <Navigate to={redirectTo} replace />
+  }
+
+  const fillDemo = (demoEmail) => {
+    setEmail(demoEmail)
+    setPassword('HomieGo123')
+    setShowDemo(true)
   }
 
   const handleSubmit = async (event) => {
@@ -82,17 +89,46 @@ const LoginPage = () => {
         </form>
 
         <aside className="panel-card">
-          <h2 className="panel-title">Cuentas demo</h2>
+          <h2 className="panel-title">¿Primera vez aquí?</h2>
           <p className="panel-text">
-            Anfitriona: <strong>ana@homiego.demo</strong> / <strong>HomieGo123</strong>
-            <br />
-            Admin: <strong>admin@homiego.demo</strong> / <strong>HomieGo123</strong>
+            Crea una cuenta de huésped o activa el rol de anfitrión desde tu perfil para publicar
+            alojamientos.
           </p>
-          <ul>
-            <li>Reservar propiedades como huésped</li>
-            <li>Publicar alojamientos como anfitrión</li>
-            <li>Ver historial de reservas</li>
-          </ul>
+          <button
+            className="button-secondary"
+            type="button"
+            onClick={() => setShowDemo((current) => !current)}
+          >
+            {showDemo ? 'Ocultar cuentas demo' : 'Usar cuentas demo'}
+          </button>
+
+          {showDemo && (
+            <div className="stack" style={{ marginTop: '1rem' }}>
+              <p className="panel-text">
+                Contraseña compartida: <strong>HomieGo123</strong>
+              </p>
+              <div className="form-actions">
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => fillDemo('ana@homiego.demo')}
+                >
+                  Entrar como Ana
+                </button>
+                <button
+                  className="button-secondary"
+                  type="button"
+                  onClick={() => fillDemo('admin@homiego.demo')}
+                >
+                  Entrar como admin
+                </button>
+              </div>
+              <ul>
+                <li>Ana: anfitriona y huésped con propiedades demo</li>
+                <li>Admin: panel de moderación</li>
+              </ul>
+            </div>
+          )}
         </aside>
       </section>
     </SiteShell>

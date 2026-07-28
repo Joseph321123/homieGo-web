@@ -58,8 +58,10 @@ const FavoritesPage = () => {
         {error && <p className="state-message state-message-error">{error}</p>}
 
         {!loading && !error && favorites.length === 0 && (
-          <div className="stack">
-            <p className="state-message">Aún no tienes favoritos.</p>
+          <div className="empty-panel">
+            <p className="state-message">
+              Aún no tienes favoritos. Guarda alojamientos desde su ficha para encontrarlos después.
+            </p>
             <Link className="button" to="/properties">
               Explorar propiedades
             </Link>

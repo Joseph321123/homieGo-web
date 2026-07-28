@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import PropertyCard from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { fetchAmenities, fetchProperties } from '../services/api'
@@ -320,11 +320,22 @@ const PropertiesPage = () => {
         {error && <p className="state-message state-message-error">{error}</p>}
 
         {!loading && !error && properties.length === 0 && (
-          <p className="state-message">
-            {hasFilters
-              ? 'No encontramos propiedades con esos filtros.'
-              : 'Aún no hay propiedades publicadas.'}
-          </p>
+          <div className="empty-panel">
+            <p className="state-message">
+              {hasFilters
+                ? 'No encontramos propiedades con esos filtros. Prueba ampliar fechas, precio o comodidades.'
+                : 'Aún no hay propiedades publicadas.'}
+            </p>
+            {hasFilters ? (
+              <button className="button" type="button" onClick={clearFilters}>
+                Quitar filtros
+              </button>
+            ) : (
+              <Link className="button" to="/">
+                Volver al inicio
+              </Link>
+            )}
+          </div>
         )}
 
         {!loading && !error && properties.length > 0 && (

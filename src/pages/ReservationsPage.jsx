@@ -10,6 +10,7 @@ import {
   getApiErrorMessage,
   payReservation,
 } from '../services/api'
+import { formatPaymentStatus, formatReservationStatus } from '../utils/labels'
 
 const ReservationsPage = () => {
   const { token } = useAuth()
@@ -36,10 +37,15 @@ const ReservationsPage = () => {
     loadReservations()
   }, [token])
 
-  const handlePay = async (reservationId) => {
+  const handlePay = async (reservation) => {
+    const confirmed = window.confirm(
+      `¿Confirmas el pago de ${formatPrice(reservation.total)} con tarjeta (demo)?`
+    )
+    if (!confirmed) return
+
     setActionMessage('')
     try {
-      await payReservation(token, reservationId, 'tarjeta')
+      await payReservation(token, reservation.id, 'tarjeta')
       setActionMessage('Pago confirmado. Tu reserva está activa.')
       await loadReservations()
     } catch (err) {
@@ -48,6 +54,9 @@ const ReservationsPage = () => {
   }
 
   const handleCancel = async (reservationId) => {
+    const confirmed = window.confirm('¿Seguro que quieres cancelar esta reservación?')
+    if (!confirmed) return
+
     setActionMessage('')
     try {
       await cancelReservation(token, reservationId)
@@ -101,8 +110,8 @@ const ReservationsPage = () => {
         {error && <p className="state-message state-message-error">{error}</p>}
 
         {!loading && !error && reservations.length === 0 && (
-          <div className="stack">
-            <p className="state-message">Aún no tienes reservas.</p>
+          <div className="empty-panel">
+            <p className="state-message">Aún no tienes reservas. Explora el catálogo y elige tu próxima estancia.</p>
             <Link className="button" to="/properties">
               Explorar propiedades
             </Link>
@@ -133,15 +142,21 @@ const ReservationsPage = () => {
                       {reservation.check_in} → {reservation.check_out}
                     </span>
                     <span className="tag">{reservation.guests} huéspedes</span>
-                    <span className="tag">{reservation.status}</span>
-                    <span className="tag">Pago: {reservation.payment_status || 'N/A'}</span>
+                    <span className="tag">{formatReservationStatus(reservation.status)}</span>
+                    <span className="tag">
+                      Pago: {formatPaymentStatus(reservation.payment_status)}
+                    </span>
                   </div>
                   <strong>{formatPrice(reservation.total)}</strong>
 
                   <div className="form-actions">
                     {reservation.status === 'pendiente' && (
                       <>
-                        <button className="button" type="button" onClick={() => handlePay(reservation.id)}>
+                        <button
+                          className="button"
+                          type="button"
+                          onClick={() => handlePay(reservation)}
+                        >
                           Pagar con tarjeta
                         </button>
                         <button

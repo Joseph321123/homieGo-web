@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -102,9 +102,14 @@ const MessagesPage = () => {
         {error && <p className="state-message state-message-error">{error}</p>}
 
         {!loading && conversations.length === 0 && (
-          <p className="state-message">
-            Aún no tienes conversaciones. Reserva una propiedad para empezar a chatear.
-          </p>
+          <div className="empty-panel">
+            <p className="state-message">
+              Aún no tienes conversaciones. Reserva una propiedad para empezar a chatear con el anfitrión.
+            </p>
+            <Link className="button" to="/properties">
+              Explorar propiedades
+            </Link>
+          </div>
         )}
 
         {!loading && conversations.length > 0 && (

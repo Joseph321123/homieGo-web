@@ -11,6 +11,7 @@ import {
   setAdminPropertyActive,
   setAdminUserActive,
 } from '../services/api'
+import { formatReservationStatus } from '../utils/labels'
 
 const AdminPage = () => {
   const { token } = useAuth()
@@ -116,7 +117,7 @@ const AdminPage = () => {
                       <span>#{item.id} · {item.property_title}</span>
                       <span>{item.guest_name}</span>
                       <span>{item.check_in} → {item.check_out}</span>
-                      <span className="tag">{item.status}</span>
+                      <span className="tag">{formatReservationStatus(item.status)}</span>
                       <span className="tag">{item.payment_status || 'sin pago'}</span>
                     </div>
                   ))}
