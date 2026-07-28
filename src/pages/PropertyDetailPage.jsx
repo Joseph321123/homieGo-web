@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { formatPrice } from '../components/PropertyCard'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
@@ -16,6 +16,7 @@ import {
 
 const PropertyDetailPage = () => {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { isAuthenticated, token } = useAuth()
   const [property, setProperty] = useState(null)
@@ -26,10 +27,23 @@ const PropertyDetailPage = () => {
   const [availabilityNote, setAvailabilityNote] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [booking, setBooking] = useState({ check_in: '', check_out: '', guests: 1 })
+  const [booking, setBooking] = useState({
+    check_in: searchParams.get('check_in') || '',
+    check_out: searchParams.get('check_out') || '',
+    guests: Number(searchParams.get('huespedes') || 1),
+  })
   const [bookingError, setBookingError] = useState('')
   const [bookingMessage, setBookingMessage] = useState('')
   const [bookingLoading, setBookingLoading] = useState(false)
+
+  useEffect(() => {
+    setBooking((current) => ({
+      ...current,
+      check_in: searchParams.get('check_in') || current.check_in,
+      check_out: searchParams.get('check_out') || current.check_out,
+      guests: Number(searchParams.get('huespedes') || current.guests || 1),
+    }))
+  }, [searchParams])
 
   useEffect(() => {
     let active = true

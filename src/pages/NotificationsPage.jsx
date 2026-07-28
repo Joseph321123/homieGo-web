@@ -8,6 +8,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from '../services/api'
+import { formatNotificationType } from '../utils/labels'
 
 const NotificationsPage = () => {
   const { token } = useAuth()
@@ -92,7 +93,14 @@ const NotificationsPage = () => {
         {message && <p className="state-message">{message}</p>}
 
         {!loading && !error && items.length === 0 && (
-          <p className="state-message">Aún no tienes notificaciones.</p>
+          <div className="empty-panel">
+            <p className="state-message">
+              Aún no tienes notificaciones. Cuando reserves, pagues o recibas mensajes, aparecerán aquí.
+            </p>
+            <Link className="button" to="/properties">
+              Explorar propiedades
+            </Link>
+          </div>
         )}
 
         {!loading && items.length > 0 && (
@@ -104,7 +112,7 @@ const NotificationsPage = () => {
               >
                 <div>
                   <div className="notification-meta">
-                    <span className="tag">{item.type}</span>
+                    <span className="tag">{formatNotificationType(item.type)}</span>
                     {!item.read && <span className="rating-pill">Nueva</span>}
                   </div>
                   <h2 className="panel-title">{item.title}</h2>

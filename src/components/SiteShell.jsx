@@ -18,7 +18,7 @@ const navigation = [
   { to: '/admin', label: 'Administración', admin: true },
 ]
 
-const SiteShell = ({ children }) => {
+const SiteShell = ({ children, wide = false }) => {
   const { isAuthenticated, isHost, isAdmin, user, logout, token } = useAuth()
   const [messageUnread, setMessageUnread] = useState(0)
   const [notificationUnread, setNotificationUnread] = useState(0)
@@ -119,12 +119,20 @@ const SiteShell = ({ children }) => {
         </div>
       </header>
 
-      <main className="page">{children}</main>
+      <main className={wide ? 'page page-wide' : 'page'}>{children}</main>
 
       <footer className="site-footer">
         <div className="site-footer-inner">
-          <span>HomieGo · plataforma fullstack inspirada en Airbnb</span>
-          <span>Reservas, anfitriones y administración en un solo lugar</span>
+          <div className="site-footer-brand">
+            <strong>HomieGo</strong>
+            <span>Hospedajes simples y confiables en México.</span>
+          </div>
+          <div className="site-footer-links">
+            <Link to="/properties">Explorar</Link>
+            <Link to="/register">Crear cuenta</Link>
+            <Link to={isHost ? '/host' : '/profile'}>Ser anfitrión</Link>
+          </div>
+          <span className="site-footer-copy">© {new Date().getFullYear()} HomieGo</span>
         </div>
       </footer>
     </div>

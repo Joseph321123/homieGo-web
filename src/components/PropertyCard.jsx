@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 
 const gradients = [
   'linear-gradient(135deg, #002862, #1383f9)',
@@ -16,14 +16,23 @@ const formatPrice = (value) =>
 export { formatPrice }
 
 const PropertyCard = ({ property, index = 0 }) => {
+  const [searchParams] = useSearchParams()
   const photoStyle = property.photo_url
     ? { backgroundImage: `url(${property.photo_url})` }
     : { '--photo': gradients[index % gradients.length] }
 
   const rating = property.rating_avg ? Number(property.rating_avg) : null
 
+  const detailParams = new URLSearchParams()
+  ;['check_in', 'check_out', 'huespedes'].forEach((key) => {
+    const value = searchParams.get(key)
+    if (value) detailParams.set(key, value)
+  })
+  const query = detailParams.toString()
+  const to = query ? `/properties/${property.id}?${query}` : `/properties/${property.id}`
+
   return (
-    <Link className="property-card-link" to={`/properties/${property.id}`}>
+    <Link className="property-card-link" to={to}>
       <article className="property-card">
         <div
           className={`property-photo${property.photo_url ? ' property-photo-image' : ''}`}
