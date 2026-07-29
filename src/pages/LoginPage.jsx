@@ -88,7 +88,12 @@ const LoginPage = () => {
           </div>
         </form>
 
-        <aside className="panel-card">
+        <aside className="panel-card auth-brand-panel">
+          <img
+            className="auth-brand-logo"
+            src="/brand/homiego-logo.png"
+            alt="HomieGo"
+          />
           <h2 className="panel-title">¿Primera vez aquí?</h2>
           <p className="panel-text">
             Crea una cuenta de huésped o activa el rol de anfitrión desde tu perfil para publicar
