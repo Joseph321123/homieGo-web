@@ -73,9 +73,18 @@ const SiteShell = ({ children, wide = false }) => {
     <div className="app-shell">
       <header className="site-header">
         <Link className="brand" to="/">
-          <span className="brand-mark">H</span>
+          <img
+            className="brand-icon"
+            src="/brand/homiego-icon.png"
+            alt="HomieGo"
+            width="48"
+            height="48"
+          />
           <span className="brand-copy">
-            <span className="brand-name">HomieGo</span>
+            <span className="brand-name">
+              <span className="brand-name-homie">Homie</span>
+              <span className="brand-name-go">Go</span>
+            </span>
             <span className="brand-tagline">Hospedajes simples y confiables</span>
           </span>
         </Link>
@@ -124,8 +133,17 @@ const SiteShell = ({ children, wide = false }) => {
       <footer className="site-footer">
         <div className="site-footer-inner">
           <div className="site-footer-brand">
-            <strong>HomieGo</strong>
-            <span>Hospedajes simples y confiables en México.</span>
+            <img
+              className="footer-brand-icon"
+              src="/brand/homiego-icon.png"
+              alt=""
+              width="36"
+              height="36"
+            />
+            <div>
+              <strong>HomieGo</strong>
+              <span>Hospedajes simples y confiables en México.</span>
+            </div>
           </div>
           <div className="site-footer-links">
             <Link to="/properties">Explorar</Link>

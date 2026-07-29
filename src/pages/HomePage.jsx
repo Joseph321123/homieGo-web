@@ -63,7 +63,22 @@ const HomePage = () => {
         style={{ backgroundImage: `linear-gradient(120deg, rgba(0, 30, 70, 0.78), rgba(0, 40, 98, 0.45)), url(${HERO_IMAGE})` }}
       >
         <div className="home-hero-inner">
-          <p className="home-hero-brand">HomieGo</p>
+          <div className="home-hero-brand-row">
+            <img
+              className="home-hero-icon"
+              src="/brand/homiego-icon.png"
+              alt=""
+              width="88"
+              height="116"
+            />
+            <div className="home-hero-wordmark">
+              <p className="home-hero-brand">
+                <span className="brand-name-homie">HOMIE</span>
+                <span className="brand-name-go">GO</span>
+              </p>
+              <p className="home-hero-tagline">Hospedajes simples y confiables</p>
+            </div>
+          </div>
           <h1 className="home-hero-title">Encuentra tu próximo hospedaje</h1>
           <p className="home-hero-copy">
             Reserva casas, suites y cabañas en México con confianza: fechas claras, anfitriones reales
