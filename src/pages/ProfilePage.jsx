@@ -2,13 +2,18 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SiteShell from '../components/SiteShell'
 import { useAuth } from '../context/AuthContext'
-import { changePassword, getApiErrorMessage } from '../services/api'
+import { changePassword, getApiErrorMessage, submitIdentity } from '../services/api'
+import { formatIdentityStatus } from '../utils/labels'
 
 const ProfilePage = () => {
   const { user, token, updateProfile, becomeHost, isHost } = useAuth()
   const [form, setForm] = useState({
     nombre: user?.nombre || '',
     telefono: user?.telefono || '',
+  })
+  const [hostForm, setHostForm] = useState({
+    documento_identidad: user?.documento_identidad || '',
+    documento_url: user?.documento_url || '',
   })
   const [passwordForm, setPasswordForm] = useState({
     current_password: '',
@@ -18,6 +23,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [hostLoading, setHostLoading] = useState(false)
+  const [identityLoading, setIdentityLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [passwordMessage, setPasswordMessage] = useState('')
   const [error, setError] = useState('')
@@ -25,6 +31,10 @@ const ProfilePage = () => {
 
   const updateField = (field) => (event) => {
     setForm((current) => ({ ...current, [field]: event.target.value }))
+  }
+
+  const updateHostField = (field) => (event) => {
+    setHostForm((current) => ({ ...current, [field]: event.target.value }))
   }
 
   const updatePasswordField = (field) => (event) => {
@@ -78,16 +88,40 @@ const ProfilePage = () => {
   }
 
   const handleBecomeHost = async () => {
+    if (!hostForm.documento_identidad.trim()) {
+      setError('Para ser anfitrión debes indicar un documento de identidad')
+      return
+    }
+
     setHostLoading(true)
     setMessage('')
     setError('')
     try {
-      await becomeHost()
-      setMessage('Ya eres anfitrión. Puedes publicar propiedades desde el panel.')
+      await becomeHost(hostForm)
+      setMessage('Ya eres anfitrión. Tu identidad quedó pendiente de verificación.')
     } catch (err) {
       setError(getApiErrorMessage(err, 'No pudimos activar el rol de anfitrión'))
     } finally {
       setHostLoading(false)
+    }
+  }
+
+  const handleSubmitIdentity = async () => {
+    if (!hostForm.documento_identidad.trim()) {
+      setError('El documento de identidad es obligatorio')
+      return
+    }
+
+    setIdentityLoading(true)
+    setMessage('')
+    setError('')
+    try {
+      await submitIdentity(token, hostForm)
+      setMessage('Documento enviado. Un admin verificará tu identidad.')
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'No pudimos enviar el documento'))
+    } finally {
+      setIdentityLoading(false)
     }
   }
 
@@ -99,7 +133,7 @@ const ProfilePage = () => {
             <span className="eyebrow">Tu cuenta</span>
             <h1 className="section-title">Mi perfil</h1>
             <p className="page-subtitle">
-              Actualiza tu información personal, contraseña y rol en HomieGo.
+              Actualiza tu información, verificación de identidad y rol en HomieGo.
             </p>
           </div>
         </div>
@@ -137,6 +171,9 @@ const ProfilePage = () => {
                     {role}
                   </span>
                 ))}
+                <span className="tag">
+                  Identidad: {formatIdentityStatus(user?.identidad_estado)}
+                </span>
               </div>
 
               {message && <p className="state-message">{message}</p>}
@@ -149,26 +186,57 @@ const ProfilePage = () => {
           </form>
 
           <aside className="panel-card">
-            <h2 className="panel-title">Rol de anfitrión</h2>
-            {isHost ? (
-              <>
-                <p className="panel-text">
-                  Ya tienes permisos para publicar y administrar hospedajes.
-                </p>
-                <Link className="button" to="/host">
-                  Ir al panel de anfitrión
-                </Link>
-              </>
-            ) : (
-              <>
-                <p className="panel-text">
-                  Activa el rol de anfitrión para publicar propiedades y recibir reservas.
-                </p>
-                <button className="button" type="button" onClick={handleBecomeHost} disabled={hostLoading}>
-                  {hostLoading ? 'Activando...' : 'Convertirme en anfitrión'}
-                </button>
-              </>
-            )}
+            <h2 className="panel-title">Anfitrión y verificación</h2>
+            <div className="stack">
+              <div className="field">
+                <label htmlFor="doc-id">Documento de identidad</label>
+                <input
+                  id="doc-id"
+                  type="text"
+                  value={hostForm.documento_identidad}
+                  onChange={updateHostField('documento_identidad')}
+                  placeholder="INE / pasaporte (demo)"
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="doc-url">URL del documento (opcional)</label>
+                <input
+                  id="doc-url"
+                  type="url"
+                  value={hostForm.documento_url}
+                  onChange={updateHostField('documento_url')}
+                  placeholder="https://..."
+                />
+              </div>
+              {isHost ? (
+                <>
+                  <p className="panel-text">
+                    Ya eres anfitrión. Estado de identidad:{' '}
+                    <strong>{formatIdentityStatus(user?.identidad_estado)}</strong>
+                  </p>
+                  <button
+                    className="button-secondary"
+                    type="button"
+                    onClick={handleSubmitIdentity}
+                    disabled={identityLoading}
+                  >
+                    {identityLoading ? 'Enviando...' : 'Actualizar documento'}
+                  </button>
+                  <Link className="button" to="/host">
+                    Ir al panel de anfitrión
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="panel-text">
+                    Para publicar propiedades debes enviar un documento y activar el rol de anfitrión.
+                  </p>
+                  <button className="button" type="button" onClick={handleBecomeHost} disabled={hostLoading}>
+                    {hostLoading ? 'Activando...' : 'Convertirme en anfitrión'}
+                  </button>
+                </>
+              )}
+            </div>
           </aside>
         </div>
 

@@ -154,7 +154,9 @@ const PropertyDetailPage = () => {
         check_out: booking.check_out,
         guests: Number(booking.guests),
       })
-      setBookingMessage('Reserva creada. Ve a Mis reservaciones para pagar y confirmar.')
+      setBookingMessage(
+        'Solicitud enviada. El anfitrión debe aceptarla antes de que puedas pagar (escrow).'
+      )
     } catch (err) {
       setBookingError(getApiErrorMessage(err, 'No pudimos completar la reserva'))
     } finally {
@@ -240,6 +242,13 @@ const PropertyDetailPage = () => {
                   <p className="panel-text">{property.description}</p>
                 </article>
 
+                {property.house_rules && (
+                  <article className="panel-card" style={{ marginTop: '1rem' }}>
+                    <h2 className="panel-title">Reglas de la casa</h2>
+                    <p className="panel-text">{property.house_rules}</p>
+                  </article>
+                )}
+
                 {(property.amenities || []).length > 0 && (
                   <article className="panel-card" style={{ marginTop: '1rem' }}>
                     <h2 className="panel-title">Comodidades</h2>
@@ -258,7 +267,32 @@ const PropertyDetailPage = () => {
                   <p className="panel-text">{property.address}</p>
                   <p className="card-meta">
                     {property.city}, {property.country}
+                    {property.host_identity_status === 'verificada' && ' · Anfitrión verificado'}
                   </p>
+                  {property.latitude != null && property.longitude != null && (
+                    <div className="property-map">
+                      <iframe
+                        title={`Mapa de ${property.title}`}
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${
+                          Number(property.longitude) - 0.02
+                        }%2C${Number(property.latitude) - 0.015}%2C${
+                          Number(property.longitude) + 0.02
+                        }%2C${Number(property.latitude) + 0.015}&layer=mapnik&marker=${
+                          property.latitude
+                        }%2C${property.longitude}`}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                      <a
+                        className="button-secondary"
+                        href={`https://www.openstreetmap.org/?mlat=${property.latitude}&mlon=${property.longitude}#map=15/${property.latitude}/${property.longitude}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Abrir mapa
+                      </a>
+                    </div>
+                  )}
                 </article>
 
                 <article className="panel-card" style={{ marginTop: '1rem' }}>
