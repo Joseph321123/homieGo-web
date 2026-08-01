@@ -75,8 +75,8 @@ export const AuthProvider = ({ children }) => {
     return response.data
   }
 
-  const becomeHost = async () => {
-    const response = await becomeHostRequest(token)
+  const becomeHost = async (payload = {}) => {
+    const response = await becomeHostRequest(token, payload)
     setUser(response.data)
     localStorage.setItem(
       STORAGE_KEY,

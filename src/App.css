@@ -1580,3 +1580,27 @@
   justify-content: space-between;
   gap: 0.5rem;
 }
+
+.property-map {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.property-map iframe {
+  width: 100%;
+  min-height: 260px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.host-reservation-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pricing-breakdown {
+  display: grid;
+  gap: 0.25rem;
+}
+
