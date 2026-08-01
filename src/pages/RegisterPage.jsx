@@ -14,6 +14,8 @@ const RegisterPage = () => {
     telefono: '',
     password: '',
     asHost: location.state?.needHost || false,
+    documento_identidad: '',
+    documento_url: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -101,6 +103,32 @@ const RegisterPage = () => {
               <input type="checkbox" checked={form.asHost} onChange={updateField('asHost')} />
               También quiero publicar propiedades como anfitrión
             </label>
+
+            {form.asHost && (
+              <>
+                <div className="field">
+                  <label htmlFor="register-doc">Documento de identidad</label>
+                  <input
+                    id="register-doc"
+                    type="text"
+                    placeholder="INE / pasaporte (obligatorio para anfitrión)"
+                    value={form.documento_identidad}
+                    onChange={updateField('documento_identidad')}
+                    required={form.asHost}
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="register-doc-url">URL del documento (opcional)</label>
+                  <input
+                    id="register-doc-url"
+                    type="url"
+                    placeholder="https://..."
+                    value={form.documento_url}
+                    onChange={updateField('documento_url')}
+                  />
+                </div>
+              </>
+            )}
 
             {error && <p className="state-message state-message-error">{error}</p>}
 

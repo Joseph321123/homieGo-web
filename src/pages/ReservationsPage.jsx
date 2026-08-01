@@ -39,14 +39,14 @@ const ReservationsPage = () => {
 
   const handlePay = async (reservation) => {
     const confirmed = window.confirm(
-      `¿Confirmas el pago de ${formatPrice(reservation.total)} con tarjeta (demo)?`
+      `¿Confirmas el pago de ${formatPrice(reservation.total)} con tarjeta (demo)?\nEl monto quedará retenido (escrow) hasta el check-in.`
     )
     if (!confirmed) return
 
     setActionMessage('')
     try {
       await payReservation(token, reservation.id, 'tarjeta')
-      setActionMessage('Pago confirmado. Tu reserva está activa.')
+      setActionMessage('Pago retenido en escrow. Tu reserva quedó confirmada.')
       await loadReservations()
     } catch (err) {
       setActionMessage(getApiErrorMessage(err, 'No pudimos procesar el pago'))
@@ -100,7 +100,7 @@ const ReservationsPage = () => {
             <span className="eyebrow">Tus viajes</span>
             <h1 className="section-title">Mis reservaciones</h1>
             <p className="page-subtitle">
-              Paga, cancela o deja una reseña sobre tus hospedajes.
+              El anfitrión acepta tu solicitud, luego pagas (escrow) y al final puedes dejar reseña.
             </p>
           </div>
         </div>
@@ -147,17 +147,35 @@ const ReservationsPage = () => {
                       Pago: {formatPaymentStatus(reservation.payment_status)}
                     </span>
                   </div>
-                  <strong>{formatPrice(reservation.total)}</strong>
+                  <div className="pricing-breakdown">
+                    <strong>{formatPrice(reservation.total)}</strong>
+                    {reservation.commission_percent != null && (
+                      <p className="card-meta">
+                        Comisión plataforma {reservation.commission_percent}% (
+                        {formatPrice(reservation.commission_amount)}) · anfitrión recibe{' '}
+                        {formatPrice(reservation.host_payout)}
+                      </p>
+                    )}
+                  </div>
 
                   <div className="form-actions">
                     {reservation.status === 'pendiente' && (
+                      <button
+                        className="button-secondary"
+                        type="button"
+                        onClick={() => handleCancel(reservation.id)}
+                      >
+                        Cancelar solicitud
+                      </button>
+                    )}
+                    {reservation.status === 'aceptada' && (
                       <>
                         <button
                           className="button"
                           type="button"
                           onClick={() => handlePay(reservation)}
                         >
-                          Pagar con tarjeta
+                          Pagar (escrow)
                         </button>
                         <button
                           className="button-secondary"
@@ -184,7 +202,7 @@ const ReservationsPage = () => {
 
                   {reservation.status === 'confirmada' && !reservation.has_review && (
                     <div className="review-form stack">
-                      <h3 className="panel-title">Deja tu reseña</h3>
+                      <h3 className="panel-title">Deja tu reseña al anfitrión</h3>
                       <div className="field">
                         <label htmlFor={`rating-${reservation.id}`}>Calificación (1-5)</label>
                         <input

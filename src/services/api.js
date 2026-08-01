@@ -38,8 +38,13 @@ export const updateProfile = async (token, payload) => {
   return data
 }
 
-export const becomeHost = async (token) => {
-  const { data } = await api.post('/api/auth/become-host', {}, authHeaders(token))
+export const becomeHost = async (token, payload = {}) => {
+  const { data } = await api.post('/api/auth/become-host', payload, authHeaders(token))
+  return data
+}
+
+export const submitIdentity = async (token, payload) => {
+  const { data } = await api.post('/api/auth/identity', payload, authHeaders(token))
   return data
 }
 
@@ -251,6 +256,73 @@ export const fetchMessagesUnreadCount = async (token) => {
 
 export const changePassword = async (token, payload) => {
   const { data } = await api.post('/api/auth/change-password', payload, authHeaders(token))
+  return data
+}
+
+export const acceptReservation = async (token, reservationId) => {
+  const { data } = await api.post(`/api/reservations/${reservationId}/accept`, {}, authHeaders(token))
+  return data
+}
+
+export const rejectReservation = async (token, reservationId) => {
+  const { data } = await api.post(`/api/reservations/${reservationId}/reject`, {}, authHeaders(token))
+  return data
+}
+
+export const releaseEscrow = async (token, reservationId) => {
+  const { data } = await api.post(
+    `/api/reservations/${reservationId}/release-escrow`,
+    {},
+    authHeaders(token)
+  )
+  return data
+}
+
+export const fetchPropertyBlocks = async (token, propertyId) => {
+  const { data } = await api.get(`/api/properties/${propertyId}/blocks`, authHeaders(token))
+  return data
+}
+
+export const createPropertyBlock = async (token, propertyId, payload) => {
+  const { data } = await api.post(`/api/properties/${propertyId}/blocks`, payload, authHeaders(token))
+  return data
+}
+
+export const removePropertyBlock = async (token, blockId) => {
+  const { data } = await api.delete(`/api/blocks/${blockId}`, authHeaders(token))
+  return data
+}
+
+export const fetchCommission = async () => {
+  const { data } = await api.get('/api/settings/commission')
+  return data
+}
+
+export const setAdminCommission = async (token, comision_porcentaje) => {
+  const { data } = await api.put(
+    '/api/admin/settings/commission',
+    { comision_porcentaje },
+    authHeaders(token)
+  )
+  return data
+}
+
+export const fetchPendingIdentities = async (token) => {
+  const { data } = await api.get('/api/admin/identities', authHeaders(token))
+  return data
+}
+
+export const setAdminIdentityStatus = async (token, userId, identidad_estado) => {
+  const { data } = await api.patch(
+    `/api/admin/users/${userId}/identity`,
+    { identidad_estado },
+    authHeaders(token)
+  )
+  return data
+}
+
+export const releaseDueEscrow = async (token) => {
+  const { data } = await api.post('/api/admin/escrow/release-due', {}, authHeaders(token))
   return data
 }
 
